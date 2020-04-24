@@ -55,15 +55,14 @@ crossorigin="anonymous"></script>
 
 <script>
 $(document).ready( function () {
-  $('#table1').DataTable();
+  var x = document.getElementsByClassName("table")
+  for (i = 0; i < x.length; i++) {
+    $x[i].DataTable();
+  }
 } );
 </script>
 
-<script>
-$(document).ready( function () {
-  $('#table2').DataTable();
-} );
-</script>
+
 
 
 {% endblock %}
