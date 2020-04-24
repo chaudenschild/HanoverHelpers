@@ -1,0 +1,6 @@
+
+*.pyc
+app/.DS_Store
+.DS_Store
+static/natalie.jpg
+hanover-helpers-venv

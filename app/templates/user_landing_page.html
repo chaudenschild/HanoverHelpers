@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+  {% if usertype == 'volunteer' %}
+    <h2> {{ user.username }}'s Profile ({{ usertype }}) </h2>
+    <h3> Volunteer </h3>
+    <a href='{{ url_for('edit_login') }}'>Change password</a>
+  {% elif usertype == 'recipient' %}
+    <div class='container'>
+      <div class='row'>
+        <h2> {{ user.username }}'s Profile </h2>
+      </div>
+      <div class='row'>
+        <div class='col-md-6'>
+
+          <h3> Preferences </h3>
+            <p>
+              <h4> Name </h4>
+              {{ user.name }} <br>
+            </p>
+            <p>
+              <h4> Phone </h4>
+              {{ user.phone }} <br>
+            </p>
+            <p>
+              <h4> Address </h4>
+              {{ user.address }} <br>
+            </p>
+            <p>
+              <h4> Store </h4>
+              {{ user.store }} <br>
+            </p>
+            <p>
+              <div>
+                <h4>Standard Grocery List</h4>
+                  <div style="overflow:scroll; height:100px;">
+                    {{ user.grocery_list }}
+                  </div>
+              </div>
+            </p>
+            <p>
+              <h4> Dropoff Day of Week </h4>
+              {{ user.dropoff_day }} <br>
+            </p>
+            <p>
+              <div>
+                <h4>Dropoff Notes</h4>
+                  <div style="overflow:scroll; height:100px;">
+                    {{ user.dropoff_notes }}
+                  </div>
+              </div>
+            </p>
+            <p>
+              <div>
+                <h4>Payment Notes</h4>
+                  <div style="overflow:scroll; height:100px;">
+                    {{ user.payment_notes }}
+                  </div>
+              </div>
+            </p>
+        </div>
+
+        <div class='col-md-6'>
+
+          <h3> Upcoming Deliveries </h3>
+          <br>
+
+          {% block table_element %}
+          {% endblock %}
+          {{ user.get_transactions(completed=False, table_id='table1') | safe }}
+
+          <h3> Completed Deliveries </h3>
+          <br>
+
+          {{ user.get_transactions(completed=True, table_id='table2') | safe }}
+
+          <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('book') }}" role="button">Book Delivery</a>
+
+        </div>
+      </div>
+
+      <ul><br>
+
+      <p><a href='{{ url_for('edit_delivery_preferences') }}'>Edit Delivery Preferences</a></p>
+      <p><a href='{{ url_for('edit_login') }}'>Change password</a></p>
+    </div>
+  {% endif %}
+{% endblock %}
