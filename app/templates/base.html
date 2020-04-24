@@ -53,16 +53,12 @@ crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-3.3.1/dt-1.10.20/sp-1.0.1/datatables.js"></script>
 
 
+
 <script>
 $(document).ready( function () {
-  var x = document.getElementsByClassName("table")
-  for (i = 0; i < x.length; i++) {
-    $x[i].DataTable();
-  }
+  $('table.display').DataTable();
 } );
 </script>
-
-
 
 
 {% endblock %}

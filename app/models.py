@@ -99,7 +99,7 @@ class Recipient(UserMixin, db.Model):
                       'List': add_autoscroll,
                       'Notes': add_autoscroll}
 
-        return df.to_html(index=False, table_id=table_id, escape=False, formatters=formatters, classes=['table table-hover table-responsive'])
+        return df.to_html(index=False, table_id=table_id, escape=False, formatters=formatters, classes=['table table-hover table-responsive display'])
 
     def __repr__(self):
         return f"<Recipient(name='{self.name}', username='{self.username}')>"
