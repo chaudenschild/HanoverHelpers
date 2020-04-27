@@ -6,6 +6,13 @@
 
   <b>{{ transaction.recipient_name() }}</b>
 
+  <p><h4>Payment Notes</h4></p>
+  <p>
+  {% for elem in recipient.print_payment_notes() %}
+    <li>{{ elem }}</li>
+  {% endfor %}
+  </p>
+
   <p><h4>Notes</h4></p>
   <p>
   {% for elem in transaction.print_notes() %}

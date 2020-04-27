@@ -176,6 +176,9 @@ class Recipient(BaseUser, db.Model):
 
     transactions = db.relationship('Transaction', back_populates='recipient')
 
+    def print_payment_notes(self):
+        return self.payment_notes.split('/n')
+
     def __repr__(self):
         return f"<Recipient(name='{self.name}', username='{self.username}')>"
 

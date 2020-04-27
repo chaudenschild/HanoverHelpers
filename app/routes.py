@@ -306,7 +306,8 @@ def edit_transaction(transaction_id):
 @login_required
 def view_list(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
-    return render_template('view.html', transaction=transaction)
+
+    return render_template('view.html', transaction=transaction, recipient=transaction.recipient)
 
 
 @app.route('/drop/<transaction_id>', methods=['GET', 'POST'])
