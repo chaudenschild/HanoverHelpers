@@ -119,7 +119,7 @@ def user(username):
     User = assign_user_type(username)
     user = User.query.filter_by(username=username).first()
 
-    if hasattr(user, 'grocery_list'):
+    if hasattr(user, 'grocery_list') and user.grocery_list is not None:
         user.clean_grocery_list = user.grocery_list.split(
             '\n')  # fix list rendering in HTML
 
@@ -134,7 +134,7 @@ def deliveries(username):
     User = assign_user_type(username)
     user = User.query.filter_by(username=username).first()
 
-    if hasattr(user, 'grocery_list'):
+    if hasattr(user, 'grocery_list') and user.grocery_list is not None:
         user.clean_grocery_list = user.grocery_list.split(
             '\n')  # fix list rendering in HTML
 
@@ -315,5 +315,16 @@ def drop_transaction(transaction_id):
     db.session.add(transaction)
     db.session.commit()
     flash('Delivery dropped')
+
+    return redirect(url_for('user', username=current_user.username))
+
+
+@app.route('/cancel/<transaction_id>', methods=['GET', 'POST'])
+@login_required
+def cancel_transaction(transaction_id):
+    transaction = Transaction.query.filter_by(id=transaction_id).first()
+    db.session.delete(transaction)
+    db.session.commit()
+    flash('Delivery canceled')
 
     return redirect(url_for('user', username=current_user.username))

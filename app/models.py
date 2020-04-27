@@ -45,25 +45,10 @@ class Table():
     def add_formatter(self, k, v):
         self.formatters[k] = v
 
-    def add_edit_transaction_column(self):
-        self.df['Edit'] = self.df['id']
-        self.formatters['Edit'] = lambda x: Table._link(
-            url_for('edit_transaction', transaction_id=int(x)), "Edit")
-
-    def add_pickup_transaction_column(self):
-        self.df['Signup'] = self.df['id']
-        self.formatters['Signup'] = lambda x: Table._link(
-            url_for('signup_transaction', transaction_id=int(x)), "Signup")
-
-    def add_drop_transaction_column(self):
-        self.df['Drop'] = self.df['id']
-        self.formatters['Drop'] = lambda x: Table._link(
-            url_for('drop_transaction', transaction_id=int(x)), "Drop")
-
-    def add_view_list_notes_column(self):
-        self.df['List/Notes'] = self.df['id']
-        self.formatters['List/Notes'] = lambda x: Table._link(
-            url_for('view_list', transaction_id=int(x)), "View List/Notes")
+    def add_transaction_link_column(self, route, label):
+        self.df[label] = self.df['id']
+        self.formatters[label] = lambda x: Table._link(
+            url_for(route, transaction_id=int(x)), label)
 
     def return_as_completed(self):
         # no hyperlinks, no id column
@@ -89,7 +74,8 @@ class Table():
         if drop_cols:
             self.df = self.df.drop(columns=drop_cols)
         self.df = self.df.rename(columns=self.column_aliases)
-        self.df.style.apply(self._conditional_row_color, axis=1)
+        # self.df.style.apply(self._conditional_row_color, axis=1)
+        self.df.style.set_properties(**{'background-color': 'black'})
         return self.df.to_html(index=False, escape=False, formatters=self.formatters, classes=['table table-hover table-responsive display'])
 
 
@@ -110,10 +96,11 @@ def transaction_signup_view(completed=None, claimed=None):
     query = db.session.query(*query_list).filter(filter_statement)
 
     table = Table(query)
-    table.add_pickup_transaction_column()
+    table.add_transaction_link_column('signup_transaction', 'Pickup')
+    table.add_transaction_link_column('view_list', 'View List/Notes')
     table.add_column_alias('name', 'Name')
 
-    return table.make_html(drop_cols=None)
+    return table.make_html(drop_cols=['list'])
 
 
 class BaseUser(UserMixin):
@@ -148,25 +135,25 @@ class BaseUser(UserMixin):
         if completed:
             query_list += [Transaction.invoice]
 
-        query = db.session.query(*query_list) \
-                          .join(Transaction,
-                                User.id == getattr(Transaction, f'{user_type}_id')) \
-                          .outerjoin(Counterpart,
-                                     getattr(Transaction, f'{counterpart_type}_id') == Counterpart.id) \
-                          .filter(User.username == self.username) \
-                          .filter(Transaction.completed == completed)
+        query = db.session.query(*query_list)\
+                          .join(Transaction, User.id == getattr(Transaction, f'{user_type}_id'))\
+                          .outerjoin(Counterpart, getattr(Transaction, f'{counterpart_type}_id') == Counterpart.id) \
+            .filter(User.username == self.username) \
+            .filter(Transaction.completed == completed)
 
         table = Table(query)
 
         if completed:
             return table.return_as_completed()
 
+        table.add_transaction_link_column('view_list', 'View List/Notes')
+
         if user_type == 'recipient':
-            table.add_edit_transaction_column()
+            table.add_transaction_link_column('edit_transaction', 'Edit')
+            table.add_transaction_link_column('cancel_transaction', 'Cancel')
 
         elif user_type == 'volunteer':
-            table.add_view_list_notes_column()
-            table.add_drop_transaction_column()
+            table.add_transaction_link_column('drop_transaction', 'Drop')
 
         return table.make_html()
 
@@ -249,6 +236,15 @@ class Transaction(db.Model):
 
     def set_invoice(self, amount):
         self.invoice = amount
+
+    def print_list(self):
+        return self.list.split('\n')
+
+    def print_notes(self):
+        return self.notes.split('\n')
+
+    def recipient_name(self):
+        return self.recipient.name
 
     def __repr__(self):
         return f"Transaction(recipient={self.recipient}, volunteer={self.volunteer})"

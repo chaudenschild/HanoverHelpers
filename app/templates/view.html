@@ -2,10 +2,22 @@
 
 {% block app_content %}
 
-  {{ transaction.recipient }}
+  <p><h4>Recipient</h4></p>
 
-  {{ transaction.list }}
+  <b>{{ transaction.recipient_name() }}</b>
 
-  {{ transaction.notes }}
+  <p><h4>Notes</h4></p>
+  <p>
+  {% for elem in transaction.print_notes() %}
+    <li>{{ elem }}</li>
+  {% endfor %}
+  </p>
+
+  <p><h4>List</h4></p>
+  <p>
+  {% for elem in transaction.print_list() %}
+    <li>{{ elem }}</li>
+  {% endfor %}
+  </p>
 
 {% endblock %}
