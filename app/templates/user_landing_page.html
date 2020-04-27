@@ -95,9 +95,11 @@
               <p>
                 <div>
                   <h4>Standard Grocery List</h4>
-                    <div style="overflow:scroll">
-                      {{ user.grocery_list }}
-                    </div>
+                    <ul>
+                      {% for elem in user.clean_grocery_list %}
+                        <li>{{ elem }}</li>
+                      {% endfor %}
+                    </ul>
                 </div>
               </p>
           <p><a class="btn btn-primary btn-md btn-block" href="{{ url_for('edit_delivery_preferences', username=current_user.username) }}" role="button">Edit Delivery Preferences</a></p>
