@@ -5,3 +5,4 @@ app/.DS_Store
 static/natalie.jpg
 hanover-helpers-venv
 app.db
+venv/

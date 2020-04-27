@@ -118,6 +118,9 @@ def edit_user_info(username):
 def user(username):
     User = assign_user_type(username)
     user = User.query.filter_by(username=username).first()
+
+    user.clean_grocery_list = user.grocery_list.split('\n') # fix list rendering in HTML
+
     usertype = assign_user_type(username, return_string=True)
 
     return render_template('user_landing_page.html', user=user, usertype=usertype)
