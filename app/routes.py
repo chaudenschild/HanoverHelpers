@@ -8,9 +8,10 @@ from flask_login import current_user, login_required, login_user, logout_user
 
 from app import app, basic_auth, db
 from app.forms import (DeliveryPreferencesForm, EditLoginForm, LoginForm,
-                       RegistrationForm, TransactionForm, UserInfoForm)
+                       RecipientInfoForm, RegistrationForm, TransactionForm,
+                       VolunteerInfoForm)
 from app.models import (Recipient, Transaction, Volunteer, assign_user_type,
-                        get_transactions)
+                        transaction_signup_view)
 
 
 @app.route('/')
@@ -79,22 +80,36 @@ def register():
 @app.route('/user/<username>/edit_user_info', methods=['GET', 'POST'])
 @login_required
 def edit_user_info(username):
-    form = UserInfoForm()
+
+    User, user_type = assign_user_type(
+        username), assign_user_type(username, return_string=True)
+    user = User.query.filter_by(username=username).first()
+
+    form = RecipientInfoForm() if user_type == 'recipient' else VolunteerInfoForm()
 
     if form.validate_on_submit():
-        User = assign_user_type(username)
-        user = User.query.filter_by(username=username)
 
         user.name = form.name.data
         user.email = form.email.data
         user.phone = form.phone.data
-        user.address = form.address.data
+
+        if type(form) == RecipientInfoForm:
+            user.address = form.address.data
 
         db.session.add(user)
         db.session.commit()
         flash('User information saved!')
-
         return redirect(url_for('user', username=username))
+
+    elif request.method == 'GET':
+
+        user.name = current_user.name
+        user.email = current_user.email
+        user.phone = current_user.phone
+
+        if type(form) == RecipientInfoForm:
+            user.address = current_user.address
+
     return render_template('standard_form.html', header='Edit User Info', form=form)
 
 
@@ -160,20 +175,18 @@ def edit_delivery_preferences(username):
 
 
 @app.route('/book', methods=["GET", "POST"])
+@login_required
 def book():
 
     form = TransactionForm()
-
     User = assign_user_type(current_user.username)
     user = User.query.filter_by(username=current_user.username).first()
 
     if form.validate_on_submit():
 
-        current_date_str = dt.date.today()
-
         trans = Transaction(store=form.store.data, date=pd.to_datetime(form.date.data),
                             list=form.grocery_list.data, notes=form.dropoff_notes.data,
-                            booking_date=current_date_str)
+                            booking_date=dt.date.today())
         trans.assign_recipient(user)
 
         db.session.add(trans)
@@ -199,12 +212,76 @@ def book():
         form.grocery_list.data = user.grocery_list
         form.dropoff_notes.data = user.dropoff_notes
 
-    return render_template('edit_make_transaction_form.html', header='Book Delivery', form=form)
+    return render_template('standard_form.html', header='Book Delivery', form=form)
 
 
-@app.route('/delivery_signup', methods=['GET', 'POST'])
+@app.route('/delivery_signup/', methods=['GET', 'POST'])
+@login_required
 def delivery_signup():
 
-    transaction_html = get_transactions(claimed=False)
+    transaction_html = transaction_signup_view(claimed=False)
 
     return render_template('delivery_signup.html', transaction_html=transaction_html)
+
+
+@app.route('/signup_transaction/<transaction_id>', methods=['GET', 'POST'])
+@login_required
+def signup_transaction(transaction_id):
+    User = assign_user_type(current_user.username)
+    user = User.query.filter_by(username=current_user.username).first()
+    transaction = Transaction.query.filter_by(id=transaction_id).first()
+
+    transaction.assign_volunteer(user)
+    db.session.add(transaction)
+    db.session.commit()
+
+    flash(f'Signed up for delivery on {transaction.date}!')
+    return redirect(url_for('user', username=current_user.username))
+
+
+@app.route('/edit_transaction/<transaction_id>', methods=['GET', 'POST'])
+@login_required
+def edit_transaction(transaction_id):
+    form = TransactionForm()
+    User = assign_user_type(current_user.username)
+    user = User.query.filter_by(username=current_user.username).first()
+    transaction = Transaction.query.filter_by(id=transaction_id).first()
+
+    if transaction.modification_count >= 2:
+        flash('You\'ve exceeded the 2 allowable modifications on this delivery')
+        return redirect(url_for('user', username=user.username))
+
+    if form.validate_on_submit():
+
+        current_date_str = dt.date.today()
+
+        transaction.store = form.store.data
+        transaction.date = form.date.data
+        transaction.list = form.grocery_list.data
+        transaction.notes = form.dropoff_notes.data
+        transaction.booking_date = dt.datetime.today()
+
+        transaction.modification_count += 1
+
+        db.session.add(transaction)
+        db.session.commit()
+
+        flash(f'Delivery modified!')
+
+        return redirect(url_for('user', username=user.username))
+
+    elif request.method == 'GET':
+
+        form.store.data = transaction.store
+        form.date.data = transaction.date
+        form.grocery_list.data = transaction.notes
+        form.dropoff_notes.data = transaction.list
+
+    return render_template('standard_form.html', header='Edit Delivery', form=form)
+
+
+@app.route('/view/<transaction_id>', methods=['GET', 'POST'])
+@login_required
+def view_list(transaction_id):
+    transaction = Transaction.query.filter_by(id=transaction_id).first()
+    return render_template('view.html', transaction=transaction)

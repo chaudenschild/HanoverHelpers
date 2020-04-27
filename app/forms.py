@@ -1,6 +1,7 @@
 import datetime as dt
 
 import pandas as pd
+import phonenumbers
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, PasswordField, RadioField, SelectField,
@@ -56,20 +57,29 @@ class EditLoginForm(FlaskForm):
             raise ValidationError('Incorrect password')
 
 
-class UserInfoForm(FlaskForm):
+class InfoForm(FlaskForm):
+    def validate_phone(self, phone):
+        try:
+            p = phonenumbers.parse(phone.data, "US")
+            if not phonenumbers.is_valid_number(p):
+                raise ValueError()
+        except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
+            raise ValidationError('Invalid phone number')
+
+
+class VolunteerInfoForm(InfoForm):
+    name = StringField('Preferred Name')
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    phone = StringField('Phone number', validators=[DataRequired()])
+    submit = SubmitField('Save Preferences')
+
+
+class RecipientInfoForm(InfoForm):
     name = StringField('Preferred Name')
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone number', validators=[DataRequired()])
     address = StringField('Address', validators=[DataRequired()])
     submit = SubmitField('Save Preferences')
-
-    def validate_phone(self, phone):
-        try:
-            p = phonenumbers.parse(phone.data)
-            if not phonenumbers.is_valid_number(p):
-                raise ValueError()
-        except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
-            raise ValidationError('Invalid phone number')
 
 
 class DeliveryPreferencesForm(FlaskForm):

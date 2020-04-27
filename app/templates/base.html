@@ -34,7 +34,7 @@ Hanover Helpers
 
 
 {% block content %}
-  <div class="container">
+  <div class="container" style='margin-right:10px margin-left:10px'>
       {% with messages = get_flashed_messages() %}
       {% if messages %}
           {% for message in messages %}
@@ -75,7 +75,6 @@ integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc="
 crossorigin="anonymous"></script>
 
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-3.3.1/dt-1.10.20/sp-1.0.1/datatables.js"></script>
-
 
 
 <script src="{{ url_for('static', filename='/lib/bootstrap/js/bootstrap.bundle.min.js') }}"></script>

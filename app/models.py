@@ -1,4 +1,5 @@
 import pandas as pd
+from flask import url_for
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -29,36 +30,62 @@ class Table():
                       'phone': 'Volunteer Phone',
                       'booking_date': 'Booking Date',
                       'date': 'Delivery Date',
-                      'list': 'List',
                       'notes': 'Notes'}
 
-    def __init__(self, query, column_aliases):
+    def __init__(self, query):
         self.query = query
         self.df = pd.read_sql(query.statement, db.session.bind)
+        self.formatters = {'Delivery Date': lambda x: '<b>' + str(x) + '</b>',
+                           'List': Table._add_autoscroll,
+                           'Notes': Table._add_autoscroll}
 
-    # TODO edit transaction links
+    def add_column_alias(self, k, v):
+        self.column_aliases[k] = v
 
-    # TODO add pickup transaction links
+    def add_formatter(self, k, v):
+        self.formatters[k] = v
+
+    def add_edit_transaction_column(self):
+        self.df['Edit'] = self.df['id']
+        self.formatters['Edit'] = lambda x: Table._link(
+            url_for('edit_transaction', transaction_id=int(x)), "Edit")
+
+    def add_pickup_transaction_column(self):
+        self.df['Signup'] = self.df['id']
+        self.formatters['Signup'] = lambda x: Table._link(
+            url_for('signup_transaction', transaction_id=int(x)), "Signup")
+
+    def add_view_list_notes_column(self):
+        self.df['List/Notes'] = self.df['id']
+        self.formatters['List/Notes'] = lambda x: Table._link(
+            url_for('view_list', transaction_id=int(x)), "View List/Notes")
+
+    def return_as_completed(self):
+        # no hyperlinks, no id column
+        self.df = self.df.drop(columns=['id', 'username'])
+        self.add_column_alias('invoice', 'Invoice')
+        self.df = self.df.rename(columns=self.column_aliases)
+        return self.df.to_html(index=False, escape=False, formatters=self.formatters, classes=['table table-hover table-responsive display'])
 
     # TODO add display info link/modal
+    @classmethod
+    def _add_autoscroll(cls, x):
+        return '<div style="overflow:scroll; height:75px;">' + x + '</div>'
 
-    def _add_autoscroll(self, x):
-        return '<div style="overflow:scroll; height:100px;">' + x + '</div>'
-
-    def _link(self, href, label):
+    @classmethod
+    def _link(cls, href, label):
         return '<a href="' + href + '">' + label + '</a>'
 
-    def _make_html(self, df):
-        df[''] = 'Edit'
-        formatters = {'Delivery Date': lambda x: '<b>' + str(x) + '</b>',
-                      'Edit': lambda x: '<a href="None">Edit</a>',
-                      'List': add_autoscroll,
-                      'Notes': add_autoscroll}
+    def make_html(self, drop_cols=['username']):
+        # invisible columns to direct styling
+        self.df = self.df.drop(columns=['id', 'completed', 'paid'])
+        if drop_cols:
+            self.df = self.df.drop(columns=drop_cols)
+        self.df = self.df.rename(columns=self.column_aliases)
+        return self.df.to_html(index=False, escape=False, formatters=self.formatters, classes=['table table-hover table-responsive display'])
 
-        return df.to_html(index=False, escape=False, formatters=formatters, classes=['table table-hover table-responsive display'])
 
-
-def get_transactions(completed=None, claimed=None):
+def transaction_signup_view(completed=None, claimed=None):
     query_list = [Transaction.id,
                   Recipient.name,
                   Transaction.store,
@@ -74,8 +101,11 @@ def get_transactions(completed=None, claimed=None):
 
     query = db.session.query(*query_list).filter(filter_statement)
 
-    df = pd.read_sql(query.statement, db.session.bind)
-    return df.to_html(index=False, classes=['table table-hover table-responsive display'])
+    table = Table(query)
+    table.add_pickup_transaction_column()
+    table.add_column_alias('name', 'Name')
+
+    return table.make_html(drop_cols=None)
 
 
 class BaseUser(UserMixin):
@@ -96,22 +126,19 @@ class BaseUser(UserMixin):
         Counterpart = Volunteer if user_type == 'recipient' else Recipient
         counterpart_type = 'volunteer' if user_type == 'recipient' else 'recipient'
 
-        column_aliases = {'name': 'Volunteer Name',
-                          'phone': 'Volunteer Phone',
-                          'booking_date': 'Booking Date',
-                          'date': 'Delivery Date',
-                          'list': 'List',
-                          'notes': 'Notes'}
-
         query_list = [User.username,
                       Transaction.id,
                       Transaction.booking_date,
                       Transaction.date,
-                      Transaction.list,
                       Transaction.store,
                       Transaction.notes,
+                      Transaction.completed,
+                      Transaction.paid,
                       Counterpart.name,
                       Counterpart.phone]
+
+        if completed:
+            query_list += [Transaction.invoice]
 
         query = db.session.query(*query_list) \
                           .join(Transaction,
@@ -121,31 +148,18 @@ class BaseUser(UserMixin):
                           .filter(User.username == self.username) \
                           .filter(Transaction.completed == completed)
 
+        table = Table(query)
+
         if completed:
-            query_list += [Transaction.invoice]
-            column_aliases['invoice'] = 'Invoice'
+            return table.return_as_completed()
 
-        df = pd.read_sql(query.statement, db.session.bind)
-        df = df.drop(columns='username')
-        df = df.rename(columns=column_aliases)
+        if user_type == 'recipient':
+            table.add_edit_transaction_column()
 
-        if html:
-            df = self._make_html(df)
+        elif user_type == 'volunteer':
+            table.add_view_list_notes_column()
 
-        return df
-
-    def _make_html(self, df):
-        df[''] = 'Edit'
-
-        def add_autoscroll(x):
-            return '<div style="overflow:scroll; height:100px;">' + x + '</div>'
-
-        formatters = {'Delivery Date': lambda x: '<b>' + str(x) + '</b>',
-                      'Edit': lambda x: '<a href="None">Edit</a>',
-                      'List': add_autoscroll,
-                      'Notes': add_autoscroll}
-
-        return df.to_html(index=False, escape=False, formatters=formatters, classes=['table table-hover table-responsive display'])
+        return table.make_html()
 
 
 class Recipient(BaseUser, db.Model):
@@ -198,6 +212,7 @@ class Transaction(db.Model):
     completed = db.Column(db.Boolean, default=False)
     invoice = db.Column(db.Float)
     paid = db.Column(db.Boolean, default=False)
+    modification_count = db.Column(db.Integer, default=0)
 
     recipient = db.relationship('Recipient', back_populates='transactions')
 
