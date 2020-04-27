@@ -28,13 +28,13 @@
           <div style='margin-bottom:55px'>
             <h3> Upcoming Deliveries </h3>
             <br>
-            {{ user.get_transactions(completed=False, table_id='table1') | safe }}
+            {{ user.get_transactions(completed=False) | safe }}
           </div>
 
           <div style='margin-bottom:40px'>
             <h3> Completed Deliveries </h3>
             <br>
-            {{ user.get_transactions(completed=True, table_id='table2') | safe }}
+            {{ user.get_transactions(completed=True) | safe }}
           </div>
 
           <a class="btn btn-primary btn-md btn-block" href="{{ url_for('delivery_signup') }}" role="button" style='font-size:20px'>Delivery Signup</a>
@@ -111,13 +111,13 @@
           <div style='margin-bottom:55px'>
             <h3> Upcoming Deliveries </h3>
             <br>
-            {{ user.get_transactions(completed=False, table_id='table1') | safe }}
+            {{ user.get_transactions(completed=False) | safe }}
           </div>
 
           <div style='margin-bottom:40px'>
             <h3> Completed Deliveries </h3>
             <br>
-            {{ user.get_transactions(completed=True, table_id='table2') | safe }}
+            {{ user.get_transactions(completed=True) | safe }}
           </div>
 
           <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('book') }}" role="button">Book Delivery</a>

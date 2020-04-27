@@ -24,11 +24,23 @@ def assign_user_type(username, return_string=False):
         return Recipient
 
 
-class HTMLTable():
+class Table():
+    column_aliases = {'name': 'Volunteer Name',
+                      'phone': 'Volunteer Phone',
+                      'booking_date': 'Booking Date',
+                      'date': 'Delivery Date',
+                      'list': 'List',
+                      'notes': 'Notes'}
 
-    def __init__(self, query):
+    def __init__(self, query, column_aliases):
         self.query = query
         self.df = pd.read_sql(query.statement, db.session.bind)
+
+    # TODO edit transaction links
+
+    # TODO add pickup transaction links
+
+    # TODO add display info link/modal
 
     def _add_autoscroll(self, x):
         return '<div style="overflow:scroll; height:100px;">' + x + '</div>'
@@ -36,14 +48,14 @@ class HTMLTable():
     def _link(self, href, label):
         return '<a href="' + href + '">' + label + '</a>'
 
-    def _make_html(self, df, table_id):
+    def _make_html(self, df):
         df[''] = 'Edit'
         formatters = {'Delivery Date': lambda x: '<b>' + str(x) + '</b>',
                       'Edit': lambda x: '<a href="None">Edit</a>',
                       'List': add_autoscroll,
                       'Notes': add_autoscroll}
 
-        return df.to_html(index=False, table_id=table_id, escape=False, formatters=formatters, classes=['table table-hover table-responsive display'])
+        return df.to_html(index=False, escape=False, formatters=formatters, classes=['table table-hover table-responsive display'])
 
 
 def get_transactions(completed=None, claimed=None):
@@ -77,14 +89,12 @@ class BaseUser(UserMixin):
     def get_id(self):
         return self.username
 
-    def get_transactions(self, completed, table_id, html=True):
+    def get_transactions(self, completed, html=True):
 
-        query_list = [Transaction.id,
-                      Recipient.username,
-                      Volunteer.name,
-                      Volunteer.phone,
-                      Transaction.booking_date,
-                      Transaction.date]
+        User, user_type = assign_user_type(self.username), assign_user_type(
+            self.username, return_string=True)
+        Counterpart = Volunteer if user_type == 'recipient' else Recipient
+        counterpart_type = 'volunteer' if user_type == 'recipient' else 'recipient'
 
         column_aliases = {'name': 'Volunteer Name',
                           'phone': 'Volunteer Phone',
@@ -93,28 +103,38 @@ class BaseUser(UserMixin):
                           'list': 'List',
                           'notes': 'Notes'}
 
-        if completed:
-            query_list += [Transaction.invoice]
-            column_aliases['invoice'] = 'Invoice'
+        query_list = [User.username,
+                      Transaction.id,
+                      Transaction.booking_date,
+                      Transaction.date,
+                      Transaction.list,
+                      Transaction.store,
+                      Transaction.notes,
+                      Counterpart.name,
+                      Counterpart.phone]
 
         query = db.session.query(*query_list) \
                           .join(Transaction,
-                                Recipient.id == Transaction.recipient_id) \
-                          .outerjoin(Volunteer,
-                                     Transaction.volunteer_id == Volunteer.id) \
-                          .filter(Recipient.username == self.username) \
+                                User.id == getattr(Transaction, f'{user_type}_id')) \
+                          .outerjoin(Counterpart,
+                                     getattr(Transaction, f'{counterpart_type}_id') == Counterpart.id) \
+                          .filter(User.username == self.username) \
                           .filter(Transaction.completed == completed)
+
+        if completed:
+            query_list += [Transaction.invoice]
+            column_aliases['invoice'] = 'Invoice'
 
         df = pd.read_sql(query.statement, db.session.bind)
         df = df.drop(columns='username')
         df = df.rename(columns=column_aliases)
 
         if html:
-            df = self._make_html(df, table_id)
+            df = self._make_html(df)
 
         return df
 
-    def _make_html(self, df, table_id):
+    def _make_html(self, df):
         df[''] = 'Edit'
 
         def add_autoscroll(x):
@@ -125,7 +145,7 @@ class BaseUser(UserMixin):
                       'List': add_autoscroll,
                       'Notes': add_autoscroll}
 
-        return df.to_html(index=False, table_id=table_id, escape=False, formatters=formatters, classes=['table table-hover table-responsive display'])
+        return df.to_html(index=False, escape=False, formatters=formatters, classes=['table table-hover table-responsive display'])
 
 
 class Recipient(BaseUser, db.Model):
@@ -177,6 +197,7 @@ class Transaction(db.Model):
     claimed = db.Column(db.Boolean, default=False)
     completed = db.Column(db.Boolean, default=False)
     invoice = db.Column(db.Float)
+    paid = db.Column(db.Boolean, default=False)
 
     recipient = db.relationship('Recipient', back_populates='transactions')
 
@@ -191,8 +212,11 @@ class Transaction(db.Model):
         self.volunteer_id = volunteer.id
         self.claimed = True
 
-    def close(self):
+    def mark_as_completed(self):
         self.completed = True
+
+    def mark_as_paid(self):
+        self.paid = True
 
     def set_invoice(self, amount):
         self.invoice = amount
