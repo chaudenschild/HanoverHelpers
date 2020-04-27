@@ -8,8 +8,9 @@ from flask_login import current_user, login_required, login_user, logout_user
 
 from app import app, basic_auth, db
 from app.forms import (DeliveryPreferencesForm, EditLoginForm, LoginForm,
-                       RegistrationForm, TransactionForm)
-from app.models import Recipient, Transaction, Volunteer, assign_user_type
+                       RegistrationForm, TransactionForm, UserInfoForm)
+from app.models import (Recipient, Transaction, Volunteer, assign_user_type,
+                        get_transactions)
 
 
 @app.route('/')
@@ -48,6 +49,7 @@ def login():
 @app.route('/logout')
 def logout():
     logout_user()
+    flash('Successfully logged out')
     return redirect(url_for('login'))
 
 
@@ -70,8 +72,30 @@ def register():
         db.session.commit()
         flash('Thank you for registering for Hanover Helpers!')
         login_user(user)
-        return redirect(url_for('user', username=user.username))
+        return redirect(url_for('edit_user_info', username=current_user.username))
     return render_template('standard_form.html', header='Register', form=form)
+
+
+@app.route('/user/<username>/edit_user_info', methods=['GET', 'POST'])
+@login_required
+def edit_user_info(username):
+    form = UserInfoForm()
+
+    if form.validate_on_submit():
+        User = assign_user_type(username)
+        user = User.query.filter_by(username=username)
+
+        user.name = form.name.data
+        user.email = form.email.data
+        user.phone = form.phone.data
+        user.address = form.address.data
+
+        db.session.add(user)
+        db.session.commit()
+        flash('User information saved!')
+
+        return redirect(url_for('user', username=username))
+    return render_template('standard_form.html', header='Edit User Info', form=form)
 
 
 @app.route('/user/<username>')
@@ -84,9 +108,9 @@ def user(username):
     return render_template('user_landing_page.html', user=user, usertype=usertype)
 
 
-@app.route('/edit_login', methods=["GET", "POST"])
+@app.route('/user/<username>/edit_login', methods=["GET", "POST"])
 @login_required
-def edit_login():
+def edit_login(username):
 
     form = EditLoginForm()
 
@@ -98,24 +122,20 @@ def edit_login():
         db.session.add(user)
         db.session.commit()
         flash('Password successfully updated')
-        redirect(url_for('user', username=user.username))
+        return redirect(url_for('user', username=user.username))
 
     return render_template('standard_form.html', header='Set Password', form=form)
 
 
-@app.route('/edit_delivery_preferences', methods=["GET", "POST"])
+@app.route('/user/<username>/edit_delivery_preferences', methods=["GET", "POST"])
 @login_required
-def edit_delivery_preferences():
+def edit_delivery_preferences(username):
     form = DeliveryPreferencesForm()
 
     if form.validate_on_submit():
         User = assign_user_type(current_user.username)
         user = User.query.filter_by(username=current_user.username).first()
 
-        user.name = form.name.data
-        user.email = form.email.data
-        user.phone = form.phone.data
-        user.address = form.address.data
         user.store = form.store.data
         user.grocery_list = form.grocery_list.data
         user.dropoff_day = form.dropoff_day.data
@@ -126,14 +146,10 @@ def edit_delivery_preferences():
         db.session.commit()
 
         flash('Delivery preferences saved')
-        redirect(url_for('user', username=user.username))
+        return redirect(url_for('user', username=user.username))
 
     elif request.method == 'GET':
 
-        form.name.data = current_user.name
-        form.email.data = current_user.email
-        form.phone.data = current_user.phone
-        form.address.data = current_user.address
         form.store.data = current_user.store
         form.grocery_list.data = current_user.grocery_list
         form.dropoff_day.data = current_user.dropoff_day
@@ -165,16 +181,30 @@ def book():
 
         day_of_week = calendar.day_name[pd.to_datetime(
             form.date.data).weekday()]
-
-        flash(f'Delivery booked for {day_of_week}, {form.date.data}!')
+        str_date = form.date.data.strftime('%m/%d')
+        flash(f'Delivery booked for {day_of_week}, {str_date}!')
 
         return redirect(url_for('user', username=user.username))
 
     elif request.method == 'GET':
 
+        d = dt.datetime.today()
+        if user.dropoff_day is not None:
+            while d.weekday() != list(calendar.day_name).index(user.dropoff_day) - 1:
+                d += dt.timedelta(1)
+
         form.store.data = user.store
-        # align user dropoff day preference with date
+        form.date.data = d + dt.timedelta(1)
+
         form.grocery_list.data = user.grocery_list
         form.dropoff_notes.data = user.dropoff_notes
 
     return render_template('edit_make_transaction_form.html', header='Book Delivery', form=form)
+
+
+@app.route('/delivery_signup', methods=['GET', 'POST'])
+def delivery_signup():
+
+    transaction_html = get_transactions(claimed=False)
+
+    return render_template('delivery_signup.html', transaction_html=transaction_html)

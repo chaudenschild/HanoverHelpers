@@ -12,11 +12,6 @@ from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 from app.models import Recipient, Volunteer, assign_user_type
 
 
-class MultiCheckboxField(SelectMultipleField):
-    widget = widgets.ListWidget(prefix_label=False)
-    option_widget = widgets.CheckboxInput()
-
-
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -28,6 +23,7 @@ class RegistrationForm(FlaskForm):
     user_type = RadioField(validators=[
         DataRequired()], choices=[('volunteer', 'Helper'), ('recipient', 'Recipient')])
     username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
         'Confirm Password', validators=[DataRequired(), EqualTo('password')])
@@ -60,20 +56,32 @@ class EditLoginForm(FlaskForm):
             raise ValidationError('Incorrect password')
 
 
+class UserInfoForm(FlaskForm):
+    name = StringField('Preferred Name')
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    phone = StringField('Phone number', validators=[DataRequired()])
+    address = StringField('Address', validators=[DataRequired()])
+    submit = SubmitField('Save Preferences')
+
+    def validate_phone(self, phone):
+        try:
+            p = phonenumbers.parse(phone.data)
+            if not phonenumbers.is_valid_number(p):
+                raise ValueError()
+        except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
+            raise ValidationError('Invalid phone number')
+
+
 class DeliveryPreferencesForm(FlaskForm):
 
     delivery_days = ['Friday', 'Saturday']
 
-    name = StringField('Preferred Name')
-    email = StringField('Email', validators=[Email()])
-    phone = StringField('Phone number', validators=[DataRequired()])
-    address = StringField('Address', validators=[DataRequired()])
     store = StringField('Store')
-    grocery_list = TextAreaField('Grocery List')
-    dropoff_day = SelectField('Delivery Day', choices=[
+    grocery_list = TextAreaField('Recurring Grocery List')
+    dropoff_day = SelectField('Preferred Delivery Day', choices=[
                               (x, x) for x in delivery_days])
-    dropoff_notes = TextAreaField('Delivery Notes')
-    payment_notes = TextAreaField('Payment Notes')
+    dropoff_notes = TextAreaField('Standard Delivery Notes')
+    payment_notes = TextAreaField('Standard Payment Notes')
     submit = SubmitField('Save Preferences')
 
 

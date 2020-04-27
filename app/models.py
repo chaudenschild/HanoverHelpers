@@ -24,22 +24,49 @@ def assign_user_type(username, return_string=False):
         return Recipient
 
 
-class Recipient(UserMixin, db.Model):
-    __tablename__ = 'recipient'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True)
-    name = db.Column(db.String)
-    email = db.Column(db.String)
-    phone = db.Column(db.String)
-    address = db.Column(db.String)
-    store = db.Column(db.String)
-    grocery_list = db.Column(db.String)
-    dropoff_day = db.Column(db.String)
-    dropoff_notes = db.Column(db.String)
-    payment_notes = db.Column(db.String)
-    password_hash = db.Column(db.String(128))
+class HTMLTable():
 
-    transactions = db.relationship('Transaction', back_populates='recipient')
+    def __init__(self, query):
+        self.query = query
+        self.df = pd.read_sql(query.statement, db.session.bind)
+
+    def _add_autoscroll(self, x):
+        return '<div style="overflow:scroll; height:100px;">' + x + '</div>'
+
+    def _link(self, href, label):
+        return '<a href="' + href + '">' + label + '</a>'
+
+    def _make_html(self, df, table_id):
+        df[''] = 'Edit'
+        formatters = {'Delivery Date': lambda x: '<b>' + str(x) + '</b>',
+                      'Edit': lambda x: '<a href="None">Edit</a>',
+                      'List': add_autoscroll,
+                      'Notes': add_autoscroll}
+
+        return df.to_html(index=False, table_id=table_id, escape=False, formatters=formatters, classes=['table table-hover table-responsive display'])
+
+
+def get_transactions(completed=None, claimed=None):
+    query_list = [Transaction.id,
+                  Recipient.name,
+                  Transaction.store,
+                  Transaction.date,
+                  Transaction.list,
+                  Transaction.notes
+                  ]
+
+    if completed:
+        filter_statement = Transaction.completed == True
+    elif claimed is not None:
+        filter_statement = Transaction.claimed == claimed
+
+    query = db.session.query(*query_list).filter(filter_statement)
+
+    df = pd.read_sql(query.statement, db.session.bind)
+    return df.to_html(index=False, classes=['table table-hover table-responsive display'])
+
+
+class BaseUser(UserMixin):
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -52,13 +79,12 @@ class Recipient(UserMixin, db.Model):
 
     def get_transactions(self, completed, table_id, html=True):
 
-        query_list = [Recipient.username,
+        query_list = [Transaction.id,
+                      Recipient.username,
                       Volunteer.name,
                       Volunteer.phone,
                       Transaction.booking_date,
-                      Transaction.date,
-                      Transaction.list,
-                      Transaction.notes]
+                      Transaction.date]
 
         column_aliases = {'name': 'Volunteer Name',
                           'phone': 'Volunteer Phone',
@@ -101,11 +127,29 @@ class Recipient(UserMixin, db.Model):
 
         return df.to_html(index=False, table_id=table_id, escape=False, formatters=formatters, classes=['table table-hover table-responsive display'])
 
+
+class Recipient(BaseUser, db.Model):
+    __tablename__ = 'recipient'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True)
+    name = db.Column(db.String)
+    email = db.Column(db.String)
+    phone = db.Column(db.String)
+    address = db.Column(db.String)
+    store = db.Column(db.String)
+    grocery_list = db.Column(db.String)
+    dropoff_day = db.Column(db.String)
+    dropoff_notes = db.Column(db.String)
+    payment_notes = db.Column(db.String)
+    password_hash = db.Column(db.String(128))
+
+    transactions = db.relationship('Transaction', back_populates='recipient')
+
     def __repr__(self):
         return f"<Recipient(name='{self.name}', username='{self.username}')>"
 
 
-class Volunteer(UserMixin, db.Model):
+class Volunteer(BaseUser, db.Model):
     __tablename__ = 'volunteer'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True)
@@ -115,15 +159,6 @@ class Volunteer(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
 
     transactions = db.relationship('Transaction', back_populates='volunteer')
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
-    def get_id(self):
-        return self.username
 
     def __repr__(self):
         return f"<Volunteer(name='{self.name}', username='{self.username}')>"
