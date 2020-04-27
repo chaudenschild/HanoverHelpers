@@ -103,12 +103,12 @@ def edit_user_info(username):
 
     elif request.method == 'GET':
 
-        user.name = current_user.name
-        user.email = current_user.email
-        user.phone = current_user.phone
+        form.name.data = current_user.name
+        form.email.data = current_user.email
+        form.phone.data = current_user.phone
 
         if type(form) == RecipientInfoForm:
-            user.address = current_user.address
+            form.address.data = current_user.address
 
     return render_template('standard_form.html', header='Edit User Info', form=form)
 
@@ -118,10 +118,11 @@ def edit_user_info(username):
 def user(username):
     User = assign_user_type(username)
     user = User.query.filter_by(username=username).first()
-
-    user.clean_grocery_list = user.grocery_list.split('\n') # fix list rendering in HTML
-
     usertype = assign_user_type(username, return_string=True)
+
+    if usertype == 'recipient':
+        user.clean_grocery_list = user.grocery_list.split(
+            '\n')  # fix list rendering in HTML
 
     return render_template('user_landing_page.html', user=user, usertype=usertype)
 
@@ -288,3 +289,15 @@ def edit_transaction(transaction_id):
 def view_list(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
     return render_template('view.html', transaction=transaction)
+
+
+@app.route('/drop/<transaction_id>', methods=['GET', 'POST'])
+@login_required
+def drop_transaction(transaction_id):
+    transaction = Transaction.query.filter_by(id=transaction_id).first()
+    transaction.drop_volunteer()
+    db.session.add(transaction)
+    db.session.commit()
+    flash('Delivery dropped')
+
+    return redirect(url_for('user', username=current_user.username))

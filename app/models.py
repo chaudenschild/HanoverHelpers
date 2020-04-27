@@ -26,8 +26,8 @@ def assign_user_type(username, return_string=False):
 
 
 class Table():
-    column_aliases = {'name': 'Volunteer Name',
-                      'phone': 'Volunteer Phone',
+    column_aliases = {'name': 'Name',
+                      'phone': 'Phone',
                       'booking_date': 'Booking Date',
                       'date': 'Delivery Date',
                       'notes': 'Notes'}
@@ -55,6 +55,11 @@ class Table():
         self.formatters['Signup'] = lambda x: Table._link(
             url_for('signup_transaction', transaction_id=int(x)), "Signup")
 
+    def add_drop_transaction_column(self):
+        self.df['Drop'] = self.df['id']
+        self.formatters['Drop'] = lambda x: Table._link(
+            url_for('drop_transaction', transaction_id=int(x)), "Drop")
+
     def add_view_list_notes_column(self):
         self.df['List/Notes'] = self.df['id']
         self.formatters['List/Notes'] = lambda x: Table._link(
@@ -67,7 +72,6 @@ class Table():
         self.df = self.df.rename(columns=self.column_aliases)
         return self.df.to_html(index=False, escape=False, formatters=self.formatters, classes=['table table-hover table-responsive display'])
 
-    # TODO add display info link/modal
     @classmethod
     def _add_autoscroll(cls, x):
         return '<div style="overflow:scroll; height:75px;">' + x + '</div>'
@@ -76,12 +80,16 @@ class Table():
     def _link(cls, href, label):
         return '<a href="' + href + '">' + label + '</a>'
 
-    def make_html(self, drop_cols=['username']):
-        # invisible columns to direct styling
-        self.df = self.df.drop(columns=['id', 'completed', 'paid'])
+    def _conditional_row_color(self, x, color='red'):
+        attr = f'background_color = {color}'
+        return [attr for attr in range(len(x))]
+
+    def make_html(self, drop_cols=['username', 'completed', 'paid']):
+        self.df = self.df.drop(columns=['id'])
         if drop_cols:
             self.df = self.df.drop(columns=drop_cols)
         self.df = self.df.rename(columns=self.column_aliases)
+        self.df.style.apply(self._conditional_row_color, axis=1)
         return self.df.to_html(index=False, escape=False, formatters=self.formatters, classes=['table table-hover table-responsive display'])
 
 
@@ -158,6 +166,7 @@ class BaseUser(UserMixin):
 
         elif user_type == 'volunteer':
             table.add_view_list_notes_column()
+            table.add_drop_transaction_column()
 
         return table.make_html()
 
@@ -226,6 +235,11 @@ class Transaction(db.Model):
         self.volunteer = volunteer
         self.volunteer_id = volunteer.id
         self.claimed = True
+
+    def drop_volunteer(self):
+        self.volunteer = None
+        self.volunteer_id = None
+        self.claimed = False
 
     def mark_as_completed(self):
         self.completed = True
