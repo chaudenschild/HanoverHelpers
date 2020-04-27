@@ -113,17 +113,32 @@ def edit_user_info(username):
     return render_template('standard_form.html', header='Edit User Info', form=form)
 
 
-@app.route('/user/<username>')
+@app.route('/user/<username>/profile')
 @login_required
 def user(username):
     User = assign_user_type(username)
     user = User.query.filter_by(username=username).first()
 
-    user.clean_grocery_list = user.grocery_list.split('\n') # fix list rendering in HTML
+    if hasattr(user, 'grocery_list'):
+        user.clean_grocery_list = user.grocery_list.split('\n') # fix list rendering in HTML
 
     usertype = assign_user_type(username, return_string=True)
 
-    return render_template('user_landing_page.html', user=user, usertype=usertype)
+    return render_template('user/profile.html', user=user, usertype=usertype)
+
+
+@app.route('/user/<username>/deliveries')
+@login_required
+def deliveries(username):
+    User = assign_user_type(username)
+    user = User.query.filter_by(username=username).first()
+
+    if hasattr(user, 'grocery_list'):
+        user.clean_grocery_list = user.grocery_list.split('\n') # fix list rendering in HTML
+
+    usertype = assign_user_type(username, return_string=True)
+
+    return render_template('user/deliveries.html', user=user, usertype=usertype)
 
 
 @app.route('/user/<username>/edit_login', methods=["GET", "POST"])
