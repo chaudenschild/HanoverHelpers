@@ -107,11 +107,7 @@ class TransactionForm(FlaskForm):
         if pd.to_datetime(date.data) - pd.Timedelta(days=1) <= dt.datetime.now():
             raise ValidationError(
                 'Orders/modifications must be made at least one day in advance')
-
-    def validate_date_allowable(self, date):
-        # TODO:
-        pass
-
-    def validate_weekly_transaction_limit(self, date):
-        # TODO:
-        pass
+        if pd.to_datetime(date.data).weekday() not in [4, 5]:
+            raise ValidationError(
+                'Orders/modifications must be placed on Friday or Saturday')
+        # TODO: weekly transaction limit

@@ -75,7 +75,7 @@ class Table():
             self.df = self.df.drop(columns=drop_cols)
         self.df = self.df.rename(columns=self.column_aliases)
         # self.df.style.apply(self._conditional_row_color, axis=1)
-        self.df.style.set_properties(**{'background-color': 'black'})
+
         return self.df.to_html(index=False, escape=False, formatters=self.formatters, classes=['table table-hover table-responsive display'])
 
 
