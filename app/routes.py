@@ -7,9 +7,9 @@ from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from app import app, basic_auth, db
-from app.forms import (DeliveryPreferencesForm, EditLoginForm, LoginForm,
-                       RecipientInfoForm, RegistrationForm, TransactionForm,
-                       VolunteerInfoForm)
+from app.forms import (DeliveryPreferencesForm, EditLoginForm, InvoiceForm,
+                       LoginForm, RecipientInfoForm, RegistrationForm,
+                       TransactionForm, VolunteerInfoForm)
 from app.models import (Recipient, Transaction, Volunteer, assign_user_type,
                         transaction_signup_view)
 
@@ -198,7 +198,7 @@ def edit_delivery_preferences(username):
 @login_required
 def book():
 
-    form = TransactionForm()
+    form = TransactionForm(current_user.username)
     User = assign_user_type(current_user.username)
     user = User.query.filter_by(username=current_user.username).first()
 
@@ -262,9 +262,11 @@ def signup_transaction(transaction_id):
 @app.route('/edit_transaction/<transaction_id>', methods=['GET', 'POST'])
 @login_required
 def edit_transaction(transaction_id):
+
     form = TransactionForm()
     User = assign_user_type(current_user.username)
     user = User.query.filter_by(username=current_user.username).first()
+
     transaction = Transaction.query.filter_by(id=transaction_id).first()
 
     if transaction.modification_count >= 2:
@@ -294,8 +296,8 @@ def edit_transaction(transaction_id):
 
         form.store.data = transaction.store
         form.date.data = transaction.date
-        form.grocery_list.data = transaction.notes
-        form.dropoff_notes.data = transaction.list
+        form.grocery_list.data = transaction.list
+        form.dropoff_notes.data = transaction.notes
 
     return render_template('standard_form.html', header='Edit Delivery', form=form)
 
@@ -328,3 +330,20 @@ def cancel_transaction(transaction_id):
     flash('Delivery canceled')
 
     return redirect(url_for('user', username=current_user.username))
+
+
+@app.route('/mark_complete/<transaction_id>', methods=['GET', 'POST'])
+@login_required
+def mark_complete(transaction_id):
+    form = InvoiceForm()
+    transaction = Transaction.query.filter_by(id=transaction_id).first()
+
+    if form.validate_on_submit():
+        transaction.mark_as_completed()
+        transaction.set_invoice(form.invoice.data)
+        db.session.commit()
+        flash('Delivery marked as complete')
+
+        return redirect(url_for('deliveries', username=current_user.username))
+
+    return render_template('standard_form.html', header='Invoice', form=form)

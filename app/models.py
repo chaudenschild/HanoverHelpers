@@ -27,6 +27,7 @@ def assign_user_type(username, return_string=False):
 
 class Table():
     column_aliases = {'name': 'Name',
+                      'store': 'Store',
                       'phone': 'Phone',
                       'booking_date': 'Booking Date',
                       'date': 'Delivery Date',
@@ -98,7 +99,6 @@ def transaction_signup_view(completed=None, claimed=None):
     table = Table(query)
     table.add_transaction_link_column('signup_transaction', 'Pickup')
     table.add_transaction_link_column('view_list', 'View List/Notes')
-    table.add_column_alias('name', 'Name')
 
     return table.make_html(drop_cols=['list'])
 
@@ -153,6 +153,7 @@ class BaseUser(UserMixin):
             table.add_transaction_link_column('cancel_transaction', 'Cancel')
 
         elif user_type == 'volunteer':
+            table.add_transaction_link_column('mark_complete', 'Mark Complete')
             table.add_transaction_link_column('drop_transaction', 'Drop')
 
         return table.make_html()

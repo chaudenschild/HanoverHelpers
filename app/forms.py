@@ -10,7 +10,8 @@ from wtforms import (BooleanField, PasswordField, RadioField, SelectField,
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
-from app.models import Recipient, Volunteer, assign_user_type
+from app import db
+from app.models import Recipient, Transaction, Volunteer, assign_user_type
 
 
 class LoginForm(FlaskForm):
@@ -103,6 +104,10 @@ class TransactionForm(FlaskForm):
     dropoff_notes = TextAreaField('Specific Delivery Notes')
     submit = SubmitField('Book Delivery')
 
+    def __init__(self, username=None, **kwargs):
+        super().__init__(**kwargs)
+        self.username = username
+
     def validate_date(self, date):
         if pd.to_datetime(date.data) - pd.Timedelta(days=1) <= dt.datetime.now():
             raise ValidationError(
@@ -110,4 +115,21 @@ class TransactionForm(FlaskForm):
         if pd.to_datetime(date.data).weekday() not in [4, 5]:
             raise ValidationError(
                 'Orders/modifications must be placed on Friday or Saturday')
-        # TODO: weekly transaction limit
+
+        if self.username is not None:
+            early_window = pd.to_datetime(
+                date.data) - pd.Timedelta(days=2)
+            late_window = pd.to_datetime(date.data) + pd.Timedelta(days=2)
+            counts = db.session.query(Transaction, Recipient).join(Recipient) \
+                .filter_by(username=self.username)\
+                .filter(Transaction.date >= early_window)\
+                .filter(Transaction.date <= late_window)\
+                .count()
+            if counts >= 1:
+                raise ValidationError(
+                    'Only one delivery allowed per week')
+
+
+class InvoiceForm(FlaskForm):
+    invoice = StringField('Amount')
+    submit = SubmitField('Submit')
