@@ -21,6 +21,7 @@ Hanover Helpers
         <a href="{{ url_for('login') }}" style="color:black;font-size:20px">Login</a>
         {% else %}
         <div style='margin-right:20px'><a href="{{ url_for('user', username=current_user.username) }}" style="font-size:20px">Profile</a></div>
+        <div style='margin-right:20px'><a href="{{ url_for('deliveries', username=current_user.username) }}" style="font-size:20px">Deliveries</a></div>
         <div>
         <a href="{{ url_for('logout') }}" style="font-size:20px">Logout</a></div>
         {% endif %}
