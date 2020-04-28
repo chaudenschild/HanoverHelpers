@@ -85,7 +85,8 @@ crossorigin="anonymous"></script>
 
 <script>
 $(document).ready( function () {
-  $('table.display').DataTable();
+  $('table.display').DataTable({
+  "ordering": false});
 } );
 </script>
 {% endblock %}
