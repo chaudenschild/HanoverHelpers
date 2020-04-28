@@ -21,6 +21,18 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 
+class ResetPasswordEmailForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Send Password Reset')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Request Password Reset')
+
+
 class RegistrationForm(FlaskForm):
     user_type = RadioField(validators=[
         DataRequired()], choices=[('volunteer', 'Helper'), ('recipient', 'Recipient')])

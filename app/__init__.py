@@ -6,6 +6,7 @@ from flask_basicauth import BasicAuth
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_bootstrap import Bootstrap
+from flask_mail import Mail
 
 from config import Config
 
@@ -19,6 +20,7 @@ login.login_view = 'login'
 basic_auth = BasicAuth(app)
 admin = Admin(app, name='hanover-helpers', template_mode='bootstrap3')
 bootstrap = Bootstrap(app)
+mail = Mail(app)
 
 from app import models, routes
 

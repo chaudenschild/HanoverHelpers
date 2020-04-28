@@ -2,6 +2,7 @@
 
 {% block optional %}
 
-New User? <a href='{{ url_for('register') }}'>Register Here</a>
+<p>New User? <a href='{{ url_for('register') }}'>Register Here</a></p>
+<p>Forgot Password? <a href='{{ url_for('reset_password_email') }}'>Reset Password</a></p>
 
 {% endblock %}

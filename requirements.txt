@@ -33,6 +33,7 @@ bitarray==1.2.1
 bkcharts==0.2
 black==19.3b0
 bleach==3.1.0
+blinker==1.4
 bokeh==1.4.0
 boto==2.49.0
 boto3==1.12.12
@@ -90,6 +91,7 @@ Flask-Bootstrap==3.3.7.1
 Flask-Compress==1.4.0
 Flask-HTTPAuth==3.3.0
 Flask-Login==0.5.0
+Flask-Mail==0.9.1
 Flask-Migrate==2.5.3
 Flask-SQLAlchemy==2.4.1
 Flask-WTF==0.14.3
@@ -139,6 +141,7 @@ jupyter-core==4.6.1
 jupyterlab==1.2.6
 jupyterlab-code-formatter==0.2.3
 jupyterlab-server==1.0.6
+jwt==1.0.0
 Keras==2.2.4
 Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.0

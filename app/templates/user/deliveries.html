@@ -16,7 +16,7 @@
             <br>
             {{ user.get_transactions(completed=True) | safe }}
           </div>
-          <a class="btn btn-primary btn-md btn-block" href="{{ url_for('delivery_signup') }}" role="button" style='font-size:20px'>Delivery Signup</a>
+          <a class="btn btn-primary btn-lg" href="{{ url_for('delivery_signup') }}" role="button" style='font-size:20px'>Delivery Signup</a>
 
         </div>
       </div>
@@ -37,7 +37,7 @@
             <br>
             {{ user.get_transactions(completed=True) | safe }}
           </div>
-          <a class="btn btn-primary btn-lg btn-block" href="{{ url_for('book') }}" role="button">Book Delivery</a>
+          <a class="btn btn-primary btn-lg" href="{{ url_for('book') }}" role="button" style='font-size: 20px'>Book Delivery</a>
         </div>
       </div>
     </div>

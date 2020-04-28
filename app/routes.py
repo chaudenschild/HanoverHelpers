@@ -7,11 +7,13 @@ from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from app import app, basic_auth, db
+from app.email import send_password_reset
 from app.forms import (DeliveryPreferencesForm, EditLoginForm, InvoiceForm,
                        LoginForm, RecipientInfoForm, RegistrationForm,
+                       ResetPasswordEmailForm, ResetPasswordForm,
                        TransactionForm, VolunteerInfoForm)
-from app.models import (Recipient, Transaction, Volunteer, assign_user_type,
-                        transaction_signup_view)
+from app.models import (BaseUser, Recipient, Transaction, Volunteer,
+                        assign_user_type, transaction_signup_view)
 
 
 @app.route('/')
@@ -75,6 +77,44 @@ def register():
         login_user(user)
         return redirect(url_for('edit_user_info', username=current_user.username))
     return render_template('standard_form.html', header='Register', form=form)
+
+
+@app.route('/reset_password_email', methods=['GET', 'POST'])
+def reset_password_email():
+
+    if current_user.is_authenticated:
+        return redirect(url_for('user', username=current_user.username))
+
+    form = ResetPasswordEmailForm()
+
+    if form.validate_on_submit():
+        user = Recipient.query.filter_by(email=form.email.data).first()
+        if user is None:
+            user = Volunteer.query.filter_by(email=form.email.data).first()
+        if user is None:
+            flash('Email not in database')
+        else:
+            send_password_reset(user)
+            flash('Password reset sent')
+            return redirect(url_for('login'))
+    return render_template('standard_form.html', header='Password Reset', form=form)
+
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('user', username=current_user.username))
+
+    user = BaseUser.verify_reset_password_token(token)
+    if not user:
+        return redirect(url_for('index'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Your password has been reset.')
+        return redirect(url_for('login'))
+    return render_template('standard_form.html', header='Reset Password', form=form)
 
 
 @app.route('/user/<username>/edit_user_info', methods=['GET', 'POST'])
@@ -217,7 +257,7 @@ def book():
         str_date = form.date.data.strftime('%m/%d')
         flash(f'Delivery booked for {day_of_week}, {str_date}!')
 
-        return redirect(url_for('user', username=user.username))
+        return redirect(url_for('deliveries', username=user.username))
 
     elif request.method == 'GET':
 
@@ -256,7 +296,7 @@ def signup_transaction(transaction_id):
     db.session.commit()
 
     flash(f'Signed up for delivery on {transaction.date}!')
-    return redirect(url_for('user', username=current_user.username))
+    return redirect(url_for('deliveries', username=current_user.username))
 
 
 @app.route('/edit_transaction/<transaction_id>', methods=['GET', 'POST'])
@@ -271,7 +311,7 @@ def edit_transaction(transaction_id):
 
     if transaction.modification_count >= 2:
         flash('You\'ve exceeded the 2 allowable modifications on this delivery')
-        return redirect(url_for('user', username=user.username))
+        return redirect(url_for('deliveries', username=user.username))
 
     if form.validate_on_submit():
 
@@ -290,7 +330,7 @@ def edit_transaction(transaction_id):
 
         flash(f'Delivery modified!')
 
-        return redirect(url_for('user', username=user.username))
+        return redirect(url_for('deliveries', username=user.username))
 
     elif request.method == 'GET':
 
@@ -319,7 +359,7 @@ def drop_transaction(transaction_id):
     db.session.commit()
     flash('Delivery dropped')
 
-    return redirect(url_for('user', username=current_user.username))
+    return redirect(url_for('deliveries', username=current_user.username))
 
 
 @app.route('/cancel/<transaction_id>', methods=['GET', 'POST'])
@@ -330,7 +370,7 @@ def cancel_transaction(transaction_id):
     db.session.commit()
     flash('Delivery canceled')
 
-    return redirect(url_for('user', username=current_user.username))
+    return redirect(url_for('deliveries', username=current_user.username))
 
 
 @app.route('/mark_complete/<transaction_id>', methods=['GET', 'POST'])

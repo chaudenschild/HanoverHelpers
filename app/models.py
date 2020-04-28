@@ -1,9 +1,12 @@
+import time
+
+import jwt
 import pandas as pd
 from flask import url_for
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app import db, login
+from app import app, db, login
 
 
 @login.user_loader
@@ -66,16 +69,11 @@ class Table():
     def _link(cls, href, label):
         return '<a href="' + href + '">' + label + '</a>'
 
-    def _conditional_row_color(self, x, color='red'):
-        attr = f'background_color = {color}'
-        return [attr for attr in range(len(x))]
-
     def make_html(self, drop_cols=['username', 'completed', 'paid']):
         self.df = self.df.drop(columns=['id'])
         if drop_cols:
             self.df = self.df.drop(columns=drop_cols)
         self.df = self.df.rename(columns=self.column_aliases)
-        # self.df.style.apply(self._conditional_row_color, axis=1)
 
         return self.df.to_html(index=False, escape=False, formatters=self.formatters, classes=['table table-hover table-responsive display'])
 
@@ -110,6 +108,30 @@ class BaseUser(UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def get_reset_password_token(self, expires_in=600):
+        user_type = assign_user_type(self.username, return_string=True)
+
+        return jwt.encode(
+            {'reset_password': self.id,
+             'user_type': user_type,
+             'exp': time.time() + expires_in},
+            app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+
+        try:
+            id = jwt.decode(token, app.config['SECRET_KEY'],
+                            algorithms=['HS256'])['reset_password']
+            user_type = jwt.decode(token, app.config['SECRET_KEY'],
+                                   algorithms=['HS256'])['user_type']
+        except:
+            return
+
+        User = Volunteer if user_type == 'volunteer' else Recipient
+
+        return User.query.get(id)
 
     def get_id(self):
         return self.username
@@ -151,10 +173,14 @@ class BaseUser(UserMixin):
         if user_type == 'recipient':
             table.add_transaction_link_column('edit_transaction', 'Edit')
             table.add_transaction_link_column('cancel_transaction', 'Cancel')
+            table.add_column_alias('name', 'Volunteer Name')
+            table.add_column_alias('phone', 'Volunteer Phone')
 
         elif user_type == 'volunteer':
             table.add_transaction_link_column('mark_complete', 'Mark Complete')
             table.add_transaction_link_column('drop_transaction', 'Drop')
+            table.add_column_alias('name', 'Recipient Name')
+            table.add_column_alias('phone', 'Recipient Phone')
 
         return table.make_html()
 
