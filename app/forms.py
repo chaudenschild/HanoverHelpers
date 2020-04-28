@@ -129,6 +129,7 @@ class TransactionForm(FlaskForm):
                 'Orders/modifications must be placed on Friday or Saturday')
 
         if self.username is not None:
+
             early_window = pd.to_datetime(
                 date.data) - pd.Timedelta(days=2)
             late_window = pd.to_datetime(date.data) + pd.Timedelta(days=2)

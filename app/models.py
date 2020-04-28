@@ -1,4 +1,5 @@
 import time
+from hashlib import md5
 
 import jwt
 import pandas as pd
@@ -102,6 +103,11 @@ def transaction_signup_view(completed=None, claimed=None):
 
 
 class BaseUser(UserMixin):
+
+    def avatar(self, size):
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+            digest, size)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
