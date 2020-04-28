@@ -1,7 +1,14 @@
+from threading import Thread
+
 from flask import render_template
 from flask_mail import Message
 
 from app import app, mail
+
+
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
 
 
 def send_email(subject, recipients, text_body, html_body, sender=None):
@@ -11,7 +18,7 @@ def send_email(subject, recipients, text_body, html_body, sender=None):
         msg = Message(subject, recipients=recipients)
     msg.body = text_body
     msg.html = html_body
-    mail.send(msg)
+    Thread(target=send_async_email, args=(app, msg)).start()
 
 
 def send_password_reset(user):
@@ -25,21 +32,28 @@ def send_password_reset(user):
                                          user=user, token=token))
 
 
-def send_booking_confirmation(user, transaction):
+def send_confirmation(user, confirmation_type, transaction):
+    if confirmation_type == 'booking':
+        template = 'booking_confirmation'
+    elif confirmation_type == 'claimed':
+        template = 'delivery_claimed_confirmation'
+
     date_str = transaction.date.strftime('%m/%d')
     subject = f'Delivery confirmed for {date_str}'
     send_email(subject,
                sender=app.config['ADMINS'][0],
                recipients=[user.email],
-               text_body=render_template('email/recipient_notification.txt',
-                                         user=user, date=date_str),
-               html_body=render_template('email/recipient_notification.html',
-                                         user=user, date=date_str))
+               text_body=render_template(f'email/{template}.txt',
+                                         user=user, date=date_str, transaction=transaction),
+               html_body=render_template(f'email/{template}.html',
+                                         user=user, date=date_str, transaction=transaction))
+
+
 # TODO: volunteer notification
 
 
 # TODO: recipient notifications
-# book delivery
+#
 # order picked up
 # Change order
 # delivery status changed

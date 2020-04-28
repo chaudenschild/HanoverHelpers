@@ -1,0 +1,12 @@
+Dear {{ user.name }},
+
+This email is to notify you that your delivery for {{ date }} has been claimed by {{ transaction.volunteer.name }}.
+
+To see your order go to your user profile at the following link:
+
+{{ url_for('user', username=user.username) }}
+
+You can alter your delivery until this Thursday evening at 8PM.
+
+Thank you,
+Hanover Helpers

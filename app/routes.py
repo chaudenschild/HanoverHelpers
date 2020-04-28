@@ -7,7 +7,7 @@ from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from app import app, basic_auth, db
-from app.email import send_booking_confirmation, send_password_reset
+from app.email import send_confirmation, send_password_reset
 from app.forms import (DeliveryPreferencesForm, EditLoginForm, InvoiceForm,
                        LoginForm, RecipientInfoForm, RegistrationForm,
                        ResetPasswordEmailForm, ResetPasswordForm,
@@ -256,7 +256,7 @@ def book():
             form.date.data).weekday()]
         str_date = form.date.data.strftime('%m/%d')
         flash(f'Delivery booked for {day_of_week}, {str_date}!')
-        send_booking_confirmation(user, trans)
+        send_confirmation(user, 'booking', transaction=trans)
 
         return redirect(url_for('deliveries', username=user.username))
 
@@ -297,6 +297,9 @@ def signup_transaction(transaction_id):
     db.session.commit()
 
     flash(f'Signed up for delivery on {transaction.date}!')
+    send_confirmation(transaction.recipient, 'claimed',
+                      transaction=transaction)
+
     return redirect(url_for('deliveries', username=current_user.username))
 
 

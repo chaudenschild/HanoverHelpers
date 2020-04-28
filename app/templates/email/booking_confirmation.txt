@@ -7,7 +7,7 @@ You will receive a notification email when your order is picked up by a voluntee
 
 {{ url_for('user', username=user.username, _external=True) }}
 
-You can alter your order until this Thursday evening at 8PM.
+You can alter your delivery until this Thursday evening at 8PM.
 
 Thank you,
 Hanover Helpers
