@@ -8,8 +8,9 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from config import Config
 
+
+from config import Config
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -39,6 +40,7 @@ class AuthenticatedModelView(ModelView):
         return redirect(url_for('login', next=request.url))
 
 
+admin.add_view(AuthenticatedModelView(models.UserDirectory, db.session))
 admin.add_view(AuthenticatedModelView(models.Volunteer, db.session))
 admin.add_view(AuthenticatedModelView(models.Recipient, db.session))
 admin.add_view(AuthenticatedModelView(models.Transaction, db.session))

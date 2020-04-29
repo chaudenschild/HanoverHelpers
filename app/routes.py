@@ -87,7 +87,7 @@ def register(user_type):
         db.session.commit()
         flash('Thank you for registering for Hanover Helpers!')
         login_user(user)
-        return redirect(url_for('edit_user_info', username=current_user.username))
+        return redirect(url_for('deliveries', username=current_user.username))
     return render_template('registration_form.html', user_type=user_type, form=form)
 
 

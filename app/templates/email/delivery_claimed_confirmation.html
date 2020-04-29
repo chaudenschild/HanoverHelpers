@@ -4,7 +4,7 @@ This email is to notify you that your delivery for <b>{{ date }}</b> has been cl
 
 <p> To see your order go to your user profile at the following link:</p>
 
-<a href="{{ url_for('user', username=user.username) }}" style='font-size:15px'>{{ user.name }}'s Profile</a>
+<a href="{{ url_for('user', username=user.username, _external=True) }}" style='font-size:15px'>{{ user.name }}'s Profile</a>
 
 <p>You can alter your delivery until <b>this Thursday evening at 8PM.</b></p>
 
