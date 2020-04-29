@@ -16,6 +16,7 @@ from app.models import (BaseUser, Recipient, Transaction, Volunteer, get_user,
                         transaction_signup_view)
 
 
+# test
 @app.route('/')
 def root():
     return redirect(url_for('login'))
