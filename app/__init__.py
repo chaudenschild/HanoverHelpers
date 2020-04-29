@@ -42,7 +42,7 @@ class AuthenticatedModelView(ModelView):
 
 class PrimaryKeyModelView(AuthenticatedModelView):
     def __init__(self, model, session, name=None, category=None, endpoint=None, url=None, **kwargs):
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             setattr(self, k, v)
 
         super().__init__(model, session, name=name,
