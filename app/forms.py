@@ -10,7 +10,7 @@ from wtforms import (BooleanField, PasswordField, RadioField, SelectField,
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
-from app import db
+from app import app, db
 from app.models import Recipient, Transaction, Volunteer, assign_user_type
 
 
@@ -37,7 +37,6 @@ class RegistrationForm(FlaskForm):
     user_type = RadioField(validators=[
         DataRequired()], choices=[('volunteer', 'Helper'), ('recipient', 'Recipient')])
     username = StringField('Username', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
         'Confirm Password', validators=[DataRequired(), EqualTo('password')])
@@ -91,7 +90,9 @@ class RecipientInfoForm(InfoForm):
     name = StringField('Preferred Name')
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone number', validators=[DataRequired()])
-    address = StringField('Address', validators=[DataRequired()])
+    address = SelectField('Address (if Other, please provide address in Delivery Notes)', choices=[
+        (x, x) for x in ['Kendal', 'Other']],
+        validators=[DataRequired()])
     submit = SubmitField('Save Preferences')
 
 
@@ -99,8 +100,11 @@ class DeliveryPreferencesForm(FlaskForm):
 
     delivery_days = ['Friday', 'Saturday']
 
-    store = StringField('Store')
-    grocery_list = TextAreaField('Recurring Grocery List')
+    store_list = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
+                  'CVS', "BJ's", 'NH Liquor Outlet']
+
+    store = SelectField('Store', choices=[
+        (x, x) for x in store_list], validators=[DataRequired()])
     dropoff_day = SelectField('Preferred Delivery Day', choices=[
                               (x, x) for x in delivery_days])
     dropoff_notes = TextAreaField('Standard Delivery Notes')
@@ -110,10 +114,15 @@ class DeliveryPreferencesForm(FlaskForm):
 
 class TransactionForm(FlaskForm):
 
-    store = StringField('Store')
-    date = DateField('Date')
-    grocery_list = TextAreaField('Specific Grocery List')
-    dropoff_notes = TextAreaField('Specific Delivery Notes')
+    store_list = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
+                  'CVS', "BJ's", 'NH Liquor Outlet']
+
+    store = SelectField('Store', choices=[
+        (x, x) for x in store_list], validators=[DataRequired()])
+    date = DateField('Date (Either Friday or Saturday)',
+                     validators=[DataRequired()])
+    grocery_list = TextAreaField('Grocery List', validators=[DataRequired()])
+    dropoff_notes = TextAreaField('Delivery Notes')
     submit = SubmitField('Book Delivery')
 
     def __init__(self, username=None, **kwargs):
@@ -121,9 +130,19 @@ class TransactionForm(FlaskForm):
         self.username = username
 
     def validate_date(self, date):
-        if pd.to_datetime(date.data) - pd.Timedelta(days=1) <= dt.datetime.now():
-            raise ValidationError(
-                'Orders/modifications must be made at least one day in advance')
+
+        # Find next Thursday
+        d = dt.datetime.today()
+        while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
+            d += dt.timedelta(1)
+        # 6PM
+        cutoff = dt.datetime(d.year, d.month, d.day,
+                             app.config['CUTOFF_DAYTIME']['Hour'])
+
+        if dt.datetime.now() > cutoff:
+            flash('Please note that the deadline for making changes to your order has passed. If you wish to cancel your order, please call Natalie at 401-575-3142.')
+            raise ValidationError
+
         if pd.to_datetime(date.data).weekday() not in [4, 5]:
             raise ValidationError(
                 'Orders/modifications must be placed on Friday or Saturday')

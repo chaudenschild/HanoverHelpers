@@ -13,6 +13,8 @@ from app import app, db, login
 @login.user_loader
 def load_user(username):
     User = assign_user_type(username)
+    if User is None:
+        return
     user = User.query.filter_by(username=username).first()
     return user
 
@@ -70,7 +72,7 @@ class Table():
     def _link(cls, href, label):
         return '<a href="' + href + '">' + label + '</a>'
 
-    def make_html(self, drop_cols=['username', 'completed', 'paid']):
+    def make_html(self, drop_cols=['username']):
         self.df = self.df.drop(columns=['id'])
         if drop_cols:
             self.df = self.df.drop(columns=drop_cols)
@@ -155,8 +157,6 @@ class BaseUser(UserMixin):
                       Transaction.date,
                       Transaction.store,
                       Transaction.notes,
-                      Transaction.completed,
-                      Transaction.paid,
                       Counterpart.name,
                       Counterpart.phone]
 
@@ -208,7 +208,8 @@ class Recipient(BaseUser, db.Model):
     transactions = db.relationship('Transaction', back_populates='recipient')
 
     def print_payment_notes(self):
-        return self.payment_notes.split('/n')
+        if self.payment_notes:
+            return self.payment_notes.split('/n')
 
     def __repr__(self):
         return f"<Recipient(name='{self.name}', username='{self.username}')>"
@@ -243,6 +244,7 @@ class Transaction(db.Model):
     completed = db.Column(db.Boolean, default=False)
     invoice = db.Column(db.Float)
     paid = db.Column(db.Boolean, default=False)
+    tip = db.Column(db.Float)
 
     recipient = db.relationship('Recipient', back_populates='transactions')
 
@@ -272,10 +274,8 @@ class Transaction(db.Model):
         self.invoice = amount
 
     def print_list(self):
-        return self.list.split('\n')
-
-    def print_notes(self):
-        return self.notes.split('\n')
+        if self.list:
+            return self.list.split('\n')
 
     def recipient_name(self):
         return self.recipient.name

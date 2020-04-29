@@ -121,11 +121,11 @@ def reset_password(token):
 @login_required
 def edit_user_info(username):
 
-    User, user_type = assign_user_type(
+    User, usertype = assign_user_type(
         username), assign_user_type(username, return_string=True)
     user = User.query.filter_by(username=username).first()
 
-    form = RecipientInfoForm() if user_type == 'recipient' else VolunteerInfoForm()
+    form = RecipientInfoForm() if usertype == 'recipient' else VolunteerInfoForm()
 
     if form.validate_on_submit():
 
@@ -150,7 +150,7 @@ def edit_user_info(username):
         if type(form) == RecipientInfoForm:
             form.address.data = current_user.address
 
-    return render_template('standard_form.html', header='Edit User Info', form=form)
+    return render_template('user_info_form.html', form=form, usertype=usertype)
 
 
 @app.route('/user/<username>/profile')
