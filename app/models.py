@@ -200,7 +200,6 @@ class Recipient(BaseUser, db.Model):
     phone = db.Column(db.String)
     address = db.Column(db.String)
     store = db.Column(db.String)
-    grocery_list = db.Column(db.String)
     dropoff_day = db.Column(db.String)
     dropoff_notes = db.Column(db.String)
     payment_notes = db.Column(db.String)
@@ -244,7 +243,6 @@ class Transaction(db.Model):
     completed = db.Column(db.Boolean, default=False)
     invoice = db.Column(db.Float)
     paid = db.Column(db.Boolean, default=False)
-    modification_count = db.Column(db.Integer, default=0)
 
     recipient = db.relationship('Recipient', back_populates='transactions')
 

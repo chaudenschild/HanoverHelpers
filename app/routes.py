@@ -212,7 +212,6 @@ def edit_delivery_preferences(username):
         user = User.query.filter_by(username=current_user.username).first()
 
         user.store = form.store.data
-        user.grocery_list = form.grocery_list.data
         user.dropoff_day = form.dropoff_day.data
         user.dropoff_notes = form.dropoff_notes.data
         user.payment_notes = form.payment_notes.data
@@ -226,7 +225,6 @@ def edit_delivery_preferences(username):
     elif request.method == 'GET':
 
         form.store.data = current_user.store
-        form.grocery_list.data = current_user.grocery_list
         form.dropoff_day.data = current_user.dropoff_day
         form.dropoff_notes.data = current_user.dropoff_notes
         form.payment_notes.data = current_user.payment_notes
@@ -264,13 +262,11 @@ def book():
 
         d = dt.datetime.today()
         if user.dropoff_day is not None:
-            while d.weekday() != list(calendar.day_name).index(user.dropoff_day) - 1:
+            while d.weekday() != list(calendar.day_name).index(user.dropoff_day):
                 d += dt.timedelta(1)
 
         form.store.data = user.store
-        form.date.data = d + dt.timedelta(1)
-
-        form.grocery_list.data = user.grocery_list
+        form.date.data = d
         form.dropoff_notes.data = user.dropoff_notes
 
     return render_template('standard_form.html', header='Book Delivery', form=form)
@@ -312,10 +308,6 @@ def edit_transaction(transaction_id):
     user = User.query.filter_by(username=current_user.username).first()
 
     transaction = Transaction.query.filter_by(id=transaction_id).first()
-
-    if transaction.modification_count >= 2:
-        flash('You\'ve exceeded the 2 allowable modifications on this delivery')
-        return redirect(url_for('deliveries', username=user.username))
 
     if form.validate_on_submit():
 
@@ -370,9 +362,21 @@ def drop_transaction(transaction_id):
 @login_required
 def cancel_transaction(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
-    db.session.delete(transaction)
-    db.session.commit()
-    flash('Delivery canceled')
+
+    # nearest Thursday 6PM
+    d = dt.datetime.today()
+    while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
+        d += dt.timedelta(1)
+    # 6PM
+    cutoff = dt.datetime(d.year, d.month, d.day,
+                         app.config['CUTOFF_DAYTIME']['Hour'])
+
+    if dt.datetime.now() > cutoff:
+        flash('Please note that the deadline for canceling your order has passed. If you wish to cancel your order, please call Natalie at 401-575-3142.')
+    else:
+        db.session.delete(transaction)
+        db.session.commit()
+        flash('Delivery canceled')
 
     return redirect(url_for('deliveries', username=current_user.username))
 
