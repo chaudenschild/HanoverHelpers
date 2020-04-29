@@ -1,0 +1,14 @@
+Dear {{ user.username }},
+
+We’ve received the change(s) you made to your order to be delivered on
+{{ date }}.
+
+To see the changes to your order, visit your upcoming deliveries here:
+
+{{ url_for('deliveries', username=user.username, _external=True)}}
+
+You can continue to make changes to your delivery until this Thursday evening at
+6PM.
+
+Best,
+The “Hanover Helpers” team

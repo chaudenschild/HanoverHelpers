@@ -1,0 +1,13 @@
+Dear {{ user.name }},
+
+Thank you for placing an order with Hanover Helpers!
+Your order is set for {{ date }}.
+
+To see your order, visit your upcoming deliveries here:
+
+{{ url_for('deliveries', username=user.username, _external=True) }}
+
+You can make changes to this delivery until this Thursday evening at 6PM.
+
+Thank you,
+Hanover Helpers

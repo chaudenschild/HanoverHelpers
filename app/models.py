@@ -12,21 +12,23 @@ from app import app, db, login
 
 @login.user_loader
 def load_user(username):
-    User = assign_user_type(username)
-    user = User.query.filter_by(username=username).first()
+    user = get_user(username)
+    if user is None:
+        return
     return user
 
 
-def assign_user_type(username, return_string=False):
-    if db.session.query(Volunteer.query.filter(Volunteer.username == username).exists()).scalar():
-        if return_string:
-            return 'volunteer'
-        return Volunteer
+def get_user(username):
+    userdir = db.session.query(UserDirectory).filter_by(
+        username=username).first()
+    if userdir is None:
+        return
+    if userdir.user_type == 'volunteer':
+        User = Volunteer
+    elif userdir.user_type == 'recipient':
+        User = Recipient
 
-    elif db.session.query(Recipient.query.filter(Recipient.username == username).exists()).scalar():
-        if return_string:
-            return 'recipient'
-        return Recipient
+    return User.query.filter_by(username=username).first()
 
 
 class Table():
@@ -70,7 +72,7 @@ class Table():
     def _link(cls, href, label):
         return '<a href="' + href + '">' + label + '</a>'
 
-    def make_html(self, drop_cols=['username', 'completed', 'paid']):
+    def make_html(self, drop_cols=['username']):
         self.df = self.df.drop(columns=['id'])
         if drop_cols:
             self.df = self.df.drop(columns=drop_cols)
@@ -102,7 +104,31 @@ def transaction_signup_view(completed=None, claimed=None):
     return table.make_html(drop_cols=['list'])
 
 
+class UserDirectory(db.Model):
+    __tablename__ = 'userdirectory'
+    username = db.Column(db.String(64), primary_key=True)
+    user_type = db.Column(db.String())
+
+
 class BaseUser(UserMixin):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._populate_userdir()
+
+    def _populate_userdir(self):
+        pass
+
+    def get_user_type(self):
+        userdir = UserDirectory.query.filter_by(username=self.username).first()
+        return userdir.user_type
+
+    def user_table(self):
+        user_type = self.get_user_type()
+        if user_type == 'volunteer':
+            return Volunteer
+        elif user_type == 'recipient':
+            return Recipient
 
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
@@ -116,11 +142,9 @@ class BaseUser(UserMixin):
         return check_password_hash(self.password_hash, password)
 
     def get_reset_password_token(self, expires_in=600):
-        user_type = assign_user_type(self.username, return_string=True)
-
         return jwt.encode(
             {'reset_password': self.id,
-             'user_type': user_type,
+             'user_type': self.get_user_type(),
              'exp': time.time() + expires_in},
             app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
@@ -144,8 +168,7 @@ class BaseUser(UserMixin):
 
     def get_transactions(self, completed, html=True):
 
-        User, user_type = assign_user_type(self.username), assign_user_type(
-            self.username, return_string=True)
+        User, user_type = self.user_table(), self.get_user_type()
         Counterpart = Volunteer if user_type == 'recipient' else Recipient
         counterpart_type = 'volunteer' if user_type == 'recipient' else 'recipient'
 
@@ -155,8 +178,6 @@ class BaseUser(UserMixin):
                       Transaction.date,
                       Transaction.store,
                       Transaction.notes,
-                      Transaction.completed,
-                      Transaction.paid,
                       Counterpart.name,
                       Counterpart.phone]
 
@@ -194,13 +215,13 @@ class BaseUser(UserMixin):
 class Recipient(BaseUser, db.Model):
     __tablename__ = 'recipient'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True)
+    username = db.Column(db.String(64), db.ForeignKey(
+        'userdirectory.username'), unique=True)
     name = db.Column(db.String)
-    email = db.Column(db.String)
+    email = db.Column(db.String, unique=True)
     phone = db.Column(db.String)
     address = db.Column(db.String)
     store = db.Column(db.String)
-    grocery_list = db.Column(db.String)
     dropoff_day = db.Column(db.String)
     dropoff_notes = db.Column(db.String)
     payment_notes = db.Column(db.String)
@@ -208,8 +229,14 @@ class Recipient(BaseUser, db.Model):
 
     transactions = db.relationship('Transaction', back_populates='recipient')
 
+    def _populate_userdir(self):
+        user = UserDirectory(username=self.username, user_type='recipient')
+        db.session.add(user)
+        db.session.commit()
+
     def print_payment_notes(self):
-        return self.payment_notes.split('/n')
+        if self.payment_notes:
+            return self.payment_notes.split('/n')
 
     def __repr__(self):
         return f"<Recipient(name='{self.name}', username='{self.username}')>"
@@ -218,13 +245,23 @@ class Recipient(BaseUser, db.Model):
 class Volunteer(BaseUser, db.Model):
     __tablename__ = 'volunteer'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True)
+    username = db.Column(db.String(64), db.ForeignKey(
+        'userdirectory.username'), unique=True)
     name = db.Column(db.String)
     phone = db.Column(db.String)
-    email = db.Column(db.String)
+    email = db.Column(db.String, unique=True)
     password_hash = db.Column(db.String(128))
+    admin = db.Column(db.Boolean, default=False)
 
     transactions = db.relationship('Transaction', back_populates='volunteer')
+
+    def _populate_userdir(self):
+        user = UserDirectory(username=self.username, user_type='volunteer')
+        db.session.add(user)
+        db.session.commit()
+
+    def is_admin(self):
+        return self.admin
 
     def __repr__(self):
         return f"<Volunteer(name='{self.name}', username='{self.username}')>"
@@ -244,7 +281,7 @@ class Transaction(db.Model):
     completed = db.Column(db.Boolean, default=False)
     invoice = db.Column(db.Float)
     paid = db.Column(db.Boolean, default=False)
-    modification_count = db.Column(db.Integer, default=0)
+    tip = db.Column(db.Float)
 
     recipient = db.relationship('Recipient', back_populates='transactions')
 
@@ -274,10 +311,8 @@ class Transaction(db.Model):
         self.invoice = amount
 
     def print_list(self):
-        return self.list.split('\n')
-
-    def print_notes(self):
-        return self.notes.split('\n')
+        if self.list:
+            return self.list.split('\n')
 
     def recipient_name(self):
         return self.recipient.name

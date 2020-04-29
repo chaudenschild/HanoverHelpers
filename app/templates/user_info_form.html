@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+  <h2> Edit User Info </h2>
+  <div class="row">
+      <div class="col-md-4">
+        <form class="form form-horizontal" method="post" role="form">
+          {{ form.hidden_tag() }}
+          {{ wtf.form_field(form.name)}}
+          {{ wtf.form_field(form.email) }}
+          {{ wtf.form_field(form.phone) }}
+          {% if usertype == 'recipient' %}
+            {{ wtf.form_field(form.address) }}
+          {% endif %}
+          {{ wtf.form_field(form.submit)}}
+        </form>
+      </div>
+    </div>
+    <br>
+{% endblock %}

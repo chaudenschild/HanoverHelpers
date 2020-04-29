@@ -7,18 +7,18 @@
   <b>{{ transaction.recipient_name() }}</b>
 
   <p><h4>Payment Notes</h4></p>
-  <p>
-  {% for elem in recipient.print_payment_notes() %}
-    <li>{{ elem }}</li>
-  {% endfor %}
-  </p>
+  {% if recipient.print_payment_notes()  %}
+    <p>
+    {% for elem in recipient.print_payment_notes() %}
+      <li>{{ elem }}</li>
+    {% endfor %}
+    </p>
+  {% endif %}
 
   <p><h4>Notes</h4></p>
-  <p>
-  {% for elem in transaction.print_notes() %}
-    <li>{{ elem }}</li>
-  {% endfor %}
-  </p>
+    <p>
+    {{ transaction.notes }}
+    </p>
 
   <p><h4>List</h4></p>
   <p>

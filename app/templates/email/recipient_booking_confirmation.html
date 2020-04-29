@@ -1,0 +1,13 @@
+<p>Dear {{ user.name }},</p>
+<p>
+Thank you for placing an order with Hanover Helpers!
+Your order is set for <b>{{ date }}</b>.
+</p>
+<p>To see your order, visit your upcoming deliveries here: </p>
+
+<a href="{{ url_for('deliveries', username=user.username, _external=True)}}" style='font-size:15px'>{{ user.name }}'s Upcoming Deliveries</a>
+
+<p>You can make changes to this delivery until <b>this Thursday evening at 6PM.</b></p>
+
+<p>Best,</p>
+<p>The "Hanover Helpers" team</p>

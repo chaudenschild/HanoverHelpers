@@ -1,0 +1,14 @@
+<p>Dear {{ user.username }},</p>
+
+<p>We’ve received the change(s) you made to your order to be delivered on
+{{ date }}.</p>
+
+<p>To see the changes to your order, visit your upcoming deliveries here:</p>
+
+<a href="{{ url_for('deliveries', username=user.username, _external=True)}}" style='font-size:15px'>{{ user.name }}'s Upcoming Deliveries</a>
+
+<p>You can continue to make changes to your delivery until this Thursday evening at
+6PM.</p>
+
+<p>Best,</p>
+<p>The “Hanover Helpers” team</p>

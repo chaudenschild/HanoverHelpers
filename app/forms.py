@@ -10,8 +10,8 @@ from wtforms import (BooleanField, PasswordField, RadioField, SelectField,
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
-from app import db
-from app.models import Recipient, Transaction, Volunteer, assign_user_type
+from app import app, db
+from app.models import Recipient, Transaction, Volunteer, get_user
 
 
 class LoginForm(FlaskForm):
@@ -30,16 +30,25 @@ class ResetPasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
         'Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Request Password Reset')
+    submit = SubmitField('Reset Password')
+
+
+class UserTypeForm(FlaskForm):
+    user_type = RadioField(validators=[
+        DataRequired()], choices=[('volunteer', 'Helper'), ('recipient', 'Recipient')])
+    submit = SubmitField('Register')
 
 
 class RegistrationForm(FlaskForm):
-    user_type = RadioField(validators=[
-        DataRequired()], choices=[('volunteer', 'Helper'), ('recipient', 'Recipient')])
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
         'Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    phone = StringField('Phone number', validators=[DataRequired()])
+    address = SelectField('Address (if Other, please provide address in Delivery Notes)', choices=[
+        (x, x) for x in ['Kendal', 'Other']],
+        validators=[DataRequired()])
     submit = SubmitField('Register')
 
     def validate_username(self, username):
@@ -62,10 +71,7 @@ class EditLoginForm(FlaskForm):
 
     def validate_old_password(self, old_password):
 
-        User = assign_user_type(current_user.username)
-        user = User.query.filter_by(username=current_user.username).first()
-
-        if not user.check_password(old_password.data):
+        if not current_user.check_password(old_password.data):
             raise ValidationError('Incorrect password')
 
 
@@ -90,7 +96,9 @@ class RecipientInfoForm(InfoForm):
     name = StringField('Preferred Name')
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone number', validators=[DataRequired()])
-    address = StringField('Address', validators=[DataRequired()])
+    address = SelectField('Address (if Other, please provide address in Delivery Notes)', choices=[
+        (x, x) for x in ['Kendal', 'Other']],
+        validators=[DataRequired()])
     submit = SubmitField('Save Preferences')
 
 
@@ -98,7 +106,12 @@ class DeliveryPreferencesForm(FlaskForm):
 
     delivery_days = ['Friday', 'Saturday']
 
-    store = StringField('Store')
+    store_list = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
+                  'CVS', "BJ's", 'NH Liquor Outlet']
+
+    store = SelectField('Store', choices=[
+        (x, x) for x in store_list], validators=[DataRequired()])
+
     dropoff_day = SelectField('Preferred Delivery Day', choices=[
                               (x, x) for x in delivery_days])
     dropoff_notes = TextAreaField('Standard Delivery Notes')
@@ -112,9 +125,10 @@ class TransactionForm(FlaskForm):
                   'CVS', "BJ's", 'NH Liquor Outlet']
 
     store = SelectField('Store', choices=[
-        (x, x) for x in store_list])
-    date = DateField('Date')
-    grocery_list = TextAreaField('Grocery List')
+        (x, x) for x in store_list], validators=[DataRequired()])
+    date = DateField('Date (Either Friday or Saturday)',
+                     validators=[DataRequired()])
+    grocery_list = TextAreaField('Grocery List', validators=[DataRequired()])
     dropoff_notes = TextAreaField('Delivery Notes')
     submit = SubmitField('Book Delivery')
 

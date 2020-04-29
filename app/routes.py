@@ -11,9 +11,9 @@ from app.email import send_confirmation, send_password_reset
 from app.forms import (DeliveryPreferencesForm, EditLoginForm, InvoiceForm,
                        LoginForm, RecipientInfoForm, RegistrationForm,
                        ResetPasswordEmailForm, ResetPasswordForm,
-                       TransactionForm, VolunteerInfoForm)
-from app.models import (BaseUser, Recipient, Transaction, Volunteer,
-                        assign_user_type, transaction_signup_view)
+                       TransactionForm, UserTypeForm, VolunteerInfoForm)
+from app.models import (BaseUser, Recipient, Transaction, Volunteer, get_user,
+                        transaction_signup_view)
 
 
 @app.route('/')
@@ -35,9 +35,7 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        User = assign_user_type(form.username.data)
-        user = User.query.filter_by(
-            username=form.username.data).first() if User is not None else None
+        user = get_user(form.username.data)
 
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
@@ -57,7 +55,19 @@ def logout():
 
 
 @app.route('/register', methods=['GET', 'POST'])
-def register():
+def select_user_type():
+    if current_user.is_authenticated:
+        return redirect(url_for('user', username=current_user.username))
+    form = UserTypeForm()
+
+    if form.validate_on_submit():
+        return redirect(url_for('register', user_type=form.user_type.data))
+
+    return render_template('standard_form.html', header='Select User Type', form=form)
+
+
+@app.route('/register/<user_type>', methods=['GET', 'POST'])
+def register(user_type):
 
     if current_user.is_authenticated:
         return redirect(url_for('user', username=current_user.username))
@@ -65,18 +75,20 @@ def register():
     form = RegistrationForm()
 
     if form.validate_on_submit():
-        if form.user_type.data == 'volunteer':
-            user = Volunteer(username=form.username.data)
-        elif form.user_type.data == 'recipient':
-            user = Recipient(username=form.username.data)
+        if user_type == 'volunteer':
+            user = Volunteer(username=form.username.data,
+                             email=form.email.data, phone=form.phone.data)
+        elif user_type == 'recipient':
+            user = Recipient(username=form.username.data,
+                             email=form.email.data, phone=form.phone.data)
 
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
         flash('Thank you for registering for Hanover Helpers!')
         login_user(user)
-        return redirect(url_for('edit_user_info', username=current_user.username))
-    return render_template('standard_form.html', header='Register', form=form)
+        return redirect(url_for('deliveries', username=current_user.username))
+    return render_template('registration_form.html', user_type=user_type, form=form)
 
 
 @app.route('/reset_password_email', methods=['GET', 'POST'])
@@ -102,6 +114,7 @@ def reset_password_email():
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
+
     if current_user.is_authenticated:
         return redirect(url_for('user', username=current_user.username))
 
@@ -121,22 +134,19 @@ def reset_password(token):
 @login_required
 def edit_user_info(username):
 
-    User, user_type = assign_user_type(
-        username), assign_user_type(username, return_string=True)
-    user = User.query.filter_by(username=username).first()
-
-    form = RecipientInfoForm() if user_type == 'recipient' else VolunteerInfoForm()
+    form = RecipientInfoForm() if current_user.get_user_type(
+    ) == 'recipient' else VolunteerInfoForm()
 
     if form.validate_on_submit():
 
-        user.name = form.name.data
-        user.email = form.email.data
-        user.phone = form.phone.data
+        current_user.name = form.name.data
+        current_user.email = form.email.data
+        current_user.phone = form.phone.data
 
         if type(form) == RecipientInfoForm:
-            user.address = form.address.data
+            current_user.address = form.address.data
 
-        db.session.add(user)
+        db.session.add(current_user)
         db.session.commit()
         flash('User information saved!')
         return redirect(url_for('user', username=username))
@@ -150,37 +160,21 @@ def edit_user_info(username):
         if type(form) == RecipientInfoForm:
             form.address.data = current_user.address
 
-    return render_template('standard_form.html', header='Edit User Info', form=form)
+    return render_template('user_info_form.html', form=form, usertype=current_user.get_user_type())
 
 
 @app.route('/user/<username>/profile')
 @login_required
 def user(username):
-    User = assign_user_type(username)
-    user = User.query.filter_by(username=username).first()
 
-    if hasattr(user, 'grocery_list') and user.grocery_list is not None:
-        user.clean_grocery_list = user.grocery_list.split(
-            '\n')  # fix list rendering in HTML
-
-    usertype = assign_user_type(username, return_string=True)
-
-    return render_template('user/profile.html', user=user, usertype=usertype)
+    return render_template('user/profile.html', user=current_user, usertype=current_user.get_user_type())
 
 
 @app.route('/user/<username>/deliveries')
 @login_required
 def deliveries(username):
-    User = assign_user_type(username)
-    user = User.query.filter_by(username=username).first()
 
-    if hasattr(user, 'grocery_list') and user.grocery_list is not None:
-        user.clean_grocery_list = user.grocery_list.split(
-            '\n')  # fix list rendering in HTML
-
-    usertype = assign_user_type(username, return_string=True)
-
-    return render_template('user/deliveries.html', user=user, usertype=usertype)
+    return render_template('user/deliveries.html', user=current_user, usertype=current_user.get_user_type())
 
 
 @app.route('/user/<username>/edit_login', methods=["GET", "POST"])
@@ -190,14 +184,12 @@ def edit_login(username):
     form = EditLoginForm()
 
     if form.validate_on_submit():
-        User = assign_user_type(current_user.username)
-        user = User.query.filter_by(username=current_user.username).first()
 
-        user.set_password(form.new_password.data)
-        db.session.add(user)
+        current_user.set_password(form.new_password.data)
+        db.session.add(current_user)
         db.session.commit()
         flash('Password successfully updated')
-        return redirect(url_for('user', username=user.username))
+        return redirect(url_for('user', username=current_user.username))
 
     return render_template('standard_form.html', header='Set Password', form=form)
 
@@ -208,25 +200,20 @@ def edit_delivery_preferences(username):
     form = DeliveryPreferencesForm()
 
     if form.validate_on_submit():
-        User = assign_user_type(current_user.username)
-        user = User.query.filter_by(username=current_user.username).first()
+        current_user.store = form.store.data
+        current_user.dropoff_day = form.dropoff_day.data
+        current_user.dropoff_notes = form.dropoff_notes.data
+        current_user.payment_notes = form.payment_notes.data
 
-        user.store = form.store.data
-        user.grocery_list = form.grocery_list.data
-        user.dropoff_day = form.dropoff_day.data
-        user.dropoff_notes = form.dropoff_notes.data
-        user.payment_notes = form.payment_notes.data
-
-        db.session.add(user)
+        db.session.add(current_user)
         db.session.commit()
 
         flash('Delivery preferences saved')
-        return redirect(url_for('user', username=user.username))
+        return redirect(url_for('user', username=current_user.username))
 
     elif request.method == 'GET':
 
         form.store.data = current_user.store
-        form.grocery_list.data = current_user.grocery_list
         form.dropoff_day.data = current_user.dropoff_day
         form.dropoff_notes.data = current_user.dropoff_notes
         form.payment_notes.data = current_user.payment_notes
@@ -239,15 +226,13 @@ def edit_delivery_preferences(username):
 def book():
 
     form = TransactionForm(current_user.username)
-    User = assign_user_type(current_user.username)
-    user = User.query.filter_by(username=current_user.username).first()
 
     if form.validate_on_submit():
 
         trans = Transaction(store=form.store.data, date=pd.to_datetime(form.date.data),
                             list=form.grocery_list.data, notes=form.dropoff_notes.data,
                             booking_date=dt.date.today())
-        trans.assign_recipient(user)
+        trans.assign_recipient(current_user)
 
         db.session.add(trans)
         db.session.commit()
@@ -256,22 +241,24 @@ def book():
             form.date.data).weekday()]
         str_date = form.date.data.strftime('%m/%d')
         flash(f'Delivery booked for {day_of_week}, {str_date}!')
-        send_confirmation(user, 'booking', transaction=trans)
+        send_confirmation(current_user, 'recipient_booking', transaction=trans)
 
-        return redirect(url_for('deliveries', username=user.username))
+        return redirect(url_for('deliveries', username=current_user.username))
 
     elif request.method == 'GET':
 
         d = dt.datetime.today()
-        if user.dropoff_day is not None:
-            while d.weekday() != list(calendar.day_name).index(user.dropoff_day) - 1:
-                d += dt.timedelta(1)
+        if current_user.dropoff_day is not None:
+            dropoff = list(calendar.day_name).index(current_user.dropoff_day)
+        else:
+            dropoff = 4
+        # default to next Friday
+        while d.weekday() != dropoff:
+            d += dt.timedelta(1)
 
-        form.store.data = user.store
-        form.date.data = d + dt.timedelta(1)
-
-        form.grocery_list.data = user.grocery_list
-        form.dropoff_notes.data = user.dropoff_notes
+        form.store.data = current_user.store
+        form.date.data = d
+        form.dropoff_notes.data = current_user.dropoff_notes
 
     return render_template('standard_form.html', header='Book Delivery', form=form)
 
@@ -288,17 +275,15 @@ def delivery_signup():
 @app.route('/signup_transaction/<transaction_id>', methods=['GET', 'POST'])
 @login_required
 def signup_transaction(transaction_id):
-    User = assign_user_type(current_user.username)
-    user = User.query.filter_by(username=current_user.username).first()
     transaction = Transaction.query.filter_by(id=transaction_id).first()
 
-    transaction.assign_volunteer(user)
+    transaction.assign_volunteer(current_user)
     db.session.add(transaction)
     db.session.commit()
 
     flash(f'Signed up for delivery on {transaction.date}!')
-    send_confirmation(transaction.recipient, 'claimed',
-                      transaction=transaction)
+    send_confirmation(transaction.volunteer,
+                      'volunteer_claimed', transaction=transaction)
 
     return redirect(url_for('deliveries', username=current_user.username))
 
@@ -308,14 +293,8 @@ def signup_transaction(transaction_id):
 def edit_transaction(transaction_id):
 
     form = TransactionForm()
-    User = assign_user_type(current_user.username)
-    user = User.query.filter_by(username=current_user.username).first()
 
     transaction = Transaction.query.filter_by(id=transaction_id).first()
-
-    if transaction.modification_count >= 2:
-        flash('You\'ve exceeded the 2 allowable modifications on this delivery')
-        return redirect(url_for('deliveries', username=user.username))
 
     if form.validate_on_submit():
 
@@ -327,14 +306,13 @@ def edit_transaction(transaction_id):
         transaction.notes = form.dropoff_notes.data
         transaction.booking_date = dt.datetime.today()
 
-        transaction.modification_count += 1
-
         db.session.add(transaction)
         db.session.commit()
 
         flash(f'Delivery modified!')
+        send_email(current_user, 'recipient_modified', transaction)
 
-        return redirect(url_for('deliveries', username=user.username))
+        return redirect(url_for('deliveries', username=current_user.username))
 
     elif request.method == 'GET':
 
@@ -370,9 +348,21 @@ def drop_transaction(transaction_id):
 @login_required
 def cancel_transaction(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
-    db.session.delete(transaction)
-    db.session.commit()
-    flash('Delivery canceled')
+
+    # nearest Thursday
+    d = dt.datetime.today()
+    while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
+        d += dt.timedelta(1)
+    # 6PM
+    cutoff = dt.datetime(d.year, d.month, d.day,
+                         app.config['CUTOFF_DAYTIME']['Hour'])
+
+    if dt.datetime.now() > cutoff:
+        flash('Please note that the deadline for canceling your order has passed. If you wish to cancel your order, please call Natalie at 401-575-3142.')
+    else:
+        db.session.delete(transaction)
+        db.session.commit()
+        flash('Delivery canceled')
 
     return redirect(url_for('deliveries', username=current_user.username))
 
