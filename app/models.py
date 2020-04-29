@@ -142,11 +142,9 @@ class BaseUser(UserMixin):
         return check_password_hash(self.password_hash, password)
 
     def get_reset_password_token(self, expires_in=600):
-        user_type = assign_user_type(self.username, return_string=True)
-
         return jwt.encode(
             {'reset_password': self.id,
-             'user_type': user_type,
+             'user_type': self.get_user_type(),
              'exp': time.time() + expires_in},
             app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
