@@ -37,7 +37,6 @@ class RegistrationForm(FlaskForm):
     user_type = RadioField(validators=[
         DataRequired()], choices=[('volunteer', 'Helper'), ('recipient', 'Recipient')])
     username = StringField('Username', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
         'Confirm Password', validators=[DataRequired(), EqualTo('password')])
@@ -100,7 +99,6 @@ class DeliveryPreferencesForm(FlaskForm):
     delivery_days = ['Friday', 'Saturday']
 
     store = StringField('Store')
-    grocery_list = TextAreaField('Recurring Grocery List')
     dropoff_day = SelectField('Preferred Delivery Day', choices=[
                               (x, x) for x in delivery_days])
     dropoff_notes = TextAreaField('Standard Delivery Notes')
@@ -128,15 +126,15 @@ class TransactionForm(FlaskForm):
 
         # Find next Thursday
         d = dt.datetime.today()
-        while d.weekday() != 3:
+        while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
             d += dt.timedelta(1)
         # 6PM
-        cutoff = dt.datetime(d.year, d.month, d.day, 18)
+        cutoff = dt.datetime(d.year, d.month, d.day,
+                             app.config['CUTOFF_DAYTIME']['Hour'])
 
         if dt.datetime.now() > cutoff:
-            flash('')
-            raise ValidationError(
-                'Orders/modifications must be made by 6PM Thursday')
+            flash('Please note that the deadline for making changes to your order has passed. If you wish to cancel your order, please call Natalie at 401-575-3142.')
+            raise ValidationError
 
         if pd.to_datetime(date.data).weekday() not in [4, 5]:
             raise ValidationError(
