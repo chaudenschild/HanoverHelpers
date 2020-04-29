@@ -241,7 +241,7 @@ def book():
             form.date.data).weekday()]
         str_date = form.date.data.strftime('%m/%d')
         flash(f'Delivery booked for {day_of_week}, {str_date}!')
-        send_confirmation(current_user, 'booking', transaction=trans)
+        send_confirmation(current_user, 'recipient_booking', transaction=trans)
 
         return redirect(url_for('deliveries', username=current_user.username))
 
@@ -282,8 +282,8 @@ def signup_transaction(transaction_id):
     db.session.commit()
 
     flash(f'Signed up for delivery on {transaction.date}!')
-    send_confirmation(transaction.recipient, 'claimed',
-                      transaction=transaction)
+    send_confirmation(transaction.volunteer,
+                      'volunteer_claimed', transaction=transaction)
 
     return redirect(url_for('deliveries', username=current_user.username))
 
@@ -312,6 +312,7 @@ def edit_transaction(transaction_id):
         db.session.commit()
 
         flash(f'Delivery modified!')
+        send_email(current_user, 'recipient_modified', transaction)
 
         return redirect(url_for('deliveries', username=current_user.username))
 

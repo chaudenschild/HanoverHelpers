@@ -9,7 +9,7 @@ from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-
+from app import models, routes
 from config import Config
 
 app = Flask(__name__)
@@ -23,8 +23,6 @@ basic_auth = BasicAuth(app)
 admin = Admin(app, name='hanover-helpers', template_mode='bootstrap3')
 bootstrap = Bootstrap(app)
 mail = Mail(app)
-
-from app import models, routes
 
 
 class AuthenticatedModelView(ModelView):
@@ -40,7 +38,17 @@ class AuthenticatedModelView(ModelView):
         return redirect(url_for('login', next=request.url))
 
 
-admin.add_view(AuthenticatedModelView(models.UserDirectory, db.session))
+class PrimaryKeyModelView(AuthenticatedModelView):
+    def __init__(self, model, session, name=None, category=None, endpoint=None, url=None, **kwargs):
+        for k, v in kwargs.iteritems():
+            setattr(self, k, v)
+
+        super().__init__(model, session, name=name,
+                         category=category, endpoint=endpoint, url=url)
+
+
+admin.add_view(PrimaryKeyModelView(models.UserDirectory,
+                                   db.session, list_columns=['username', 'user_type']))
 admin.add_view(AuthenticatedModelView(models.Volunteer, db.session))
 admin.add_view(AuthenticatedModelView(models.Recipient, db.session))
 admin.add_view(AuthenticatedModelView(models.Transaction, db.session))
