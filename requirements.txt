@@ -14,3 +14,4 @@ pandas==1.0.3
 phonenumbers==8.12.2
 email_validator
 gunicorn
+psycopg2
