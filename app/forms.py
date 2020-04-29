@@ -110,10 +110,14 @@ class DeliveryPreferencesForm(FlaskForm):
 
 class TransactionForm(FlaskForm):
 
-    store = StringField('Store')
+    store_list = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
+                  'CVS', "BJ's", 'NH Liquor Outlet']
+
+    store = SelectField('Store', choices=[
+        (x, x) for x in store_list])
     date = DateField('Date')
-    grocery_list = TextAreaField('Specific Grocery List')
-    dropoff_notes = TextAreaField('Specific Delivery Notes')
+    grocery_list = TextAreaField('Grocery List')
+    dropoff_notes = TextAreaField('Delivery Notes')
     submit = SubmitField('Book Delivery')
 
     def __init__(self, username=None, **kwargs):
@@ -121,9 +125,19 @@ class TransactionForm(FlaskForm):
         self.username = username
 
     def validate_date(self, date):
-        if pd.to_datetime(date.data) - pd.Timedelta(days=1) <= dt.datetime.now():
+
+        # Find next Thursday
+        d = dt.datetime.today()
+        while d.weekday() != 3:
+            d += dt.timedelta(1)
+        # 6PM
+        cutoff = dt.datetime(d.year, d.month, d.day, 18)
+
+        if dt.datetime.now() > cutoff:
+            flash('')
             raise ValidationError(
-                'Orders/modifications must be made at least one day in advance')
+                'Orders/modifications must be made by 6PM Thursday')
+
         if pd.to_datetime(date.data).weekday() not in [4, 5]:
             raise ValidationError(
                 'Orders/modifications must be placed on Friday or Saturday')
