@@ -12,8 +12,8 @@ from app.forms import (DeliveryPreferencesForm, EditLoginForm, InvoiceForm,
                        LoginForm, RecipientInfoForm, RegistrationForm,
                        ResetPasswordEmailForm, ResetPasswordForm,
                        TransactionForm, VolunteerInfoForm)
-from app.models import (BaseUser, Recipient, Transaction, Volunteer,
-                        assign_user_type, transaction_signup_view)
+from app.models import (BaseUser, Recipient, Transaction, Volunteer, get_user,
+                        transaction_signup_view)
 
 
 @app.route('/')
@@ -35,9 +35,7 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        User = assign_user_type(form.username.data)
-        user = User.query.filter_by(
-            username=form.username.data).first() if User is not None else None
+        user = get_user(form.username.data)
 
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
@@ -121,22 +119,19 @@ def reset_password(token):
 @login_required
 def edit_user_info(username):
 
-    User, usertype = assign_user_type(
-        username), assign_user_type(username, return_string=True)
-    user = User.query.filter_by(username=username).first()
-
-    form = RecipientInfoForm() if usertype == 'recipient' else VolunteerInfoForm()
+    form = RecipientInfoForm() if current_user.get_user_type(
+    ) == 'recipient' else VolunteerInfoForm()
 
     if form.validate_on_submit():
 
-        user.name = form.name.data
-        user.email = form.email.data
-        user.phone = form.phone.data
+        current_user.name = form.name.data
+        current_user.email = form.email.data
+        current_user.phone = form.phone.data
 
         if type(form) == RecipientInfoForm:
-            user.address = form.address.data
+            current_user.address = form.address.data
 
-        db.session.add(user)
+        db.session.add(current_user)
         db.session.commit()
         flash('User information saved!')
         return redirect(url_for('user', username=username))
@@ -150,37 +145,29 @@ def edit_user_info(username):
         if type(form) == RecipientInfoForm:
             form.address.data = current_user.address
 
-    return render_template('user_info_form.html', form=form, usertype=usertype)
+    return render_template('user_info_form.html', form=form, usertype=current_user.get_user_type())
 
 
 @app.route('/user/<username>/profile')
 @login_required
 def user(username):
-    User = assign_user_type(username)
-    user = User.query.filter_by(username=username).first()
 
-    if hasattr(user, 'grocery_list') and user.grocery_list is not None:
-        user.clean_grocery_list = user.grocery_list.split(
+    if hasattr(user, 'grocery_list') and current_user.grocery_list is not None:
+        current_user.clean_grocery_list = current_user.grocery_list.split(
             '\n')  # fix list rendering in HTML
 
-    usertype = assign_user_type(username, return_string=True)
-
-    return render_template('user/profile.html', user=user, usertype=usertype)
+    return render_template('user/profile.html', user=current_user, usertype=current_user.get_user_type())
 
 
 @app.route('/user/<username>/deliveries')
 @login_required
 def deliveries(username):
-    User = assign_user_type(username)
-    user = User.query.filter_by(username=username).first()
 
-    if hasattr(user, 'grocery_list') and user.grocery_list is not None:
-        user.clean_grocery_list = user.grocery_list.split(
+    if hasattr(current_user, 'grocery_list') and current_user.grocery_list is not None:
+        current_user.clean_grocery_list = current_user.grocery_list.split(
             '\n')  # fix list rendering in HTML
 
-    usertype = assign_user_type(username, return_string=True)
-
-    return render_template('user/deliveries.html', user=user, usertype=usertype)
+    return render_template('user/deliveries.html', user=current_user, usertype=current_user.get_user_type())
 
 
 @app.route('/user/<username>/edit_login', methods=["GET", "POST"])
@@ -190,14 +177,12 @@ def edit_login(username):
     form = EditLoginForm()
 
     if form.validate_on_submit():
-        User = assign_user_type(current_user.username)
-        user = User.query.filter_by(username=current_user.username).first()
 
-        user.set_password(form.new_password.data)
-        db.session.add(user)
+        current_user.set_password(form.new_password.data)
+        db.session.add(current_user)
         db.session.commit()
         flash('Password successfully updated')
-        return redirect(url_for('user', username=user.username))
+        return redirect(url_for('user', username=current_user.username))
 
     return render_template('standard_form.html', header='Set Password', form=form)
 
@@ -208,19 +193,16 @@ def edit_delivery_preferences(username):
     form = DeliveryPreferencesForm()
 
     if form.validate_on_submit():
-        User = assign_user_type(current_user.username)
-        user = User.query.filter_by(username=current_user.username).first()
+        current_user.store = form.store.data
+        current_user.dropoff_day = form.dropoff_day.data
+        current_user.dropoff_notes = form.dropoff_notes.data
+        current_user.payment_notes = form.payment_notes.data
 
-        user.store = form.store.data
-        user.dropoff_day = form.dropoff_day.data
-        user.dropoff_notes = form.dropoff_notes.data
-        user.payment_notes = form.payment_notes.data
-
-        db.session.add(user)
+        db.session.add(current_user)
         db.session.commit()
 
         flash('Delivery preferences saved')
-        return redirect(url_for('user', username=user.username))
+        return redirect(url_for('user', username=current_user.username))
 
     elif request.method == 'GET':
 
@@ -237,15 +219,13 @@ def edit_delivery_preferences(username):
 def book():
 
     form = TransactionForm(current_user.username)
-    User = assign_user_type(current_user.username)
-    user = User.query.filter_by(username=current_user.username).first()
 
     if form.validate_on_submit():
 
         trans = Transaction(store=form.store.data, date=pd.to_datetime(form.date.data),
                             list=form.grocery_list.data, notes=form.dropoff_notes.data,
                             booking_date=dt.date.today())
-        trans.assign_recipient(user)
+        trans.assign_recipient(current_user)
 
         db.session.add(trans)
         db.session.commit()
@@ -254,20 +234,20 @@ def book():
             form.date.data).weekday()]
         str_date = form.date.data.strftime('%m/%d')
         flash(f'Delivery booked for {day_of_week}, {str_date}!')
-        send_confirmation(user, 'booking', transaction=trans)
+        send_confirmation(current_user, 'booking', transaction=trans)
 
-        return redirect(url_for('deliveries', username=user.username))
+        return redirect(url_for('deliveries', username=current_user.username))
 
     elif request.method == 'GET':
 
         d = dt.datetime.today()
-        if user.dropoff_day is not None:
-            while d.weekday() != list(calendar.day_name).index(user.dropoff_day):
+        if current_user.dropoff_day is not None:
+            while d.weekday() != list(calendar.day_name).index(current_user.dropoff_day):
                 d += dt.timedelta(1)
 
-        form.store.data = user.store
+        form.store.data = current_user.store
         form.date.data = d
-        form.dropoff_notes.data = user.dropoff_notes
+        form.dropoff_notes.data = current_user.dropoff_notes
 
     return render_template('standard_form.html', header='Book Delivery', form=form)
 
@@ -284,11 +264,9 @@ def delivery_signup():
 @app.route('/signup_transaction/<transaction_id>', methods=['GET', 'POST'])
 @login_required
 def signup_transaction(transaction_id):
-    User = assign_user_type(current_user.username)
-    user = User.query.filter_by(username=current_user.username).first()
     transaction = Transaction.query.filter_by(id=transaction_id).first()
 
-    transaction.assign_volunteer(user)
+    transaction.assign_volunteer(current_user)
     db.session.add(transaction)
     db.session.commit()
 
@@ -304,8 +282,6 @@ def signup_transaction(transaction_id):
 def edit_transaction(transaction_id):
 
     form = TransactionForm()
-    User = assign_user_type(current_user.username)
-    user = User.query.filter_by(username=current_user.username).first()
 
     transaction = Transaction.query.filter_by(id=transaction_id).first()
 
@@ -326,7 +302,7 @@ def edit_transaction(transaction_id):
 
         flash(f'Delivery modified!')
 
-        return redirect(url_for('deliveries', username=user.username))
+        return redirect(url_for('deliveries', username=current_user.username))
 
     elif request.method == 'GET':
 

@@ -12,23 +12,23 @@ from app import app, db, login
 
 @login.user_loader
 def load_user(username):
-    User = assign_user_type(username)
-    if User is None:
+    user = get_user(username)
+    if user is None:
         return
-    user = User.query.filter_by(username=username).first()
     return user
 
 
-def assign_user_type(username, return_string=False):
-    if db.session.query(Volunteer.query.filter(Volunteer.username == username).exists()).scalar():
-        if return_string:
-            return 'volunteer'
-        return Volunteer
+def get_user(username):
+    userdir = db.session.query(UserDirectory).filter_by(
+        username=username).first()
+    if userdir is None:
+        return
+    if userdir.user_type == 'volunteer':
+        User = Volunteer
+    elif userdir.user_type == 'recipient':
+        User = Recipient
 
-    elif db.session.query(Recipient.query.filter(Recipient.username == username).exists()).scalar():
-        if return_string:
-            return 'recipient'
-        return Recipient
+    return User.query.filter_by(username=username).first()
 
 
 class Table():
@@ -104,7 +104,31 @@ def transaction_signup_view(completed=None, claimed=None):
     return table.make_html(drop_cols=['list'])
 
 
+class UserDirectory(db.Model):
+    __tablename__ = 'userdirectory'
+    username = db.Column(db.String(64), primary_key=True)
+    user_type = db.Column(db.String())
+
+
 class BaseUser(UserMixin):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._populate_userdir()
+
+    def _populate_userdir(self):
+        pass
+
+    def get_user_type(self):
+        userdir = UserDirectory.query.filter_by(username=self.username).first()
+        return userdir.user_type
+
+    def user_table(self):
+        user_type = self.get_user_type()
+        if user_type == 'volunteer':
+            return Volunteer
+        elif user_type == 'recipient':
+            return Recipient
 
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
@@ -146,8 +170,7 @@ class BaseUser(UserMixin):
 
     def get_transactions(self, completed, html=True):
 
-        User, user_type = assign_user_type(self.username), assign_user_type(
-            self.username, return_string=True)
+        User, user_type = self.user_table(), self.get_user_type()
         Counterpart = Volunteer if user_type == 'recipient' else Recipient
         counterpart_type = 'volunteer' if user_type == 'recipient' else 'recipient'
 
@@ -194,9 +217,10 @@ class BaseUser(UserMixin):
 class Recipient(BaseUser, db.Model):
     __tablename__ = 'recipient'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True)
+    username = db.Column(db.String(64), db.ForeignKey(
+        'userdirectory.username'), unique=True)
     name = db.Column(db.String)
-    email = db.Column(db.String)
+    email = db.Column(db.String, unique=True)
     phone = db.Column(db.String)
     address = db.Column(db.String)
     store = db.Column(db.String)
@@ -206,6 +230,11 @@ class Recipient(BaseUser, db.Model):
     password_hash = db.Column(db.String(128))
 
     transactions = db.relationship('Transaction', back_populates='recipient')
+
+    def _populate_userdir(self):
+        user = UserDirectory(username=self.username, user_type='recipient')
+        db.session.add(user)
+        db.session.commit()
 
     def print_payment_notes(self):
         if self.payment_notes:
@@ -218,13 +247,19 @@ class Recipient(BaseUser, db.Model):
 class Volunteer(BaseUser, db.Model):
     __tablename__ = 'volunteer'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True)
+    username = db.Column(db.String(64), db.ForeignKey(
+        'userdirectory.username'), unique=True)
     name = db.Column(db.String)
     phone = db.Column(db.String)
-    email = db.Column(db.String)
+    email = db.Column(db.String, unique=True)
     password_hash = db.Column(db.String(128))
 
     transactions = db.relationship('Transaction', back_populates='volunteer')
+
+    def _populate_userdir(self):
+        user = UserDirectory(username=self.username, user_type='volunteer')
+        db.session.add(user)
+        db.session.commit()
 
     def __repr__(self):
         return f"<Volunteer(name='{self.name}', username='{self.username}')>"

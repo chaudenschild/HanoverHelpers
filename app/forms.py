@@ -11,7 +11,7 @@ from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
 from app import app, db
-from app.models import Recipient, Transaction, Volunteer, assign_user_type
+from app.models import Recipient, Transaction, Volunteer, get_user
 
 
 class LoginForm(FlaskForm):
@@ -62,10 +62,7 @@ class EditLoginForm(FlaskForm):
 
     def validate_old_password(self, old_password):
 
-        User = assign_user_type(current_user.username)
-        user = User.query.filter_by(username=current_user.username).first()
-
-        if not user.check_password(old_password.data):
+        if not current_user.check_password(old_password.data):
             raise ValidationError('Incorrect password')
 
 
