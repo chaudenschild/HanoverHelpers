@@ -306,8 +306,6 @@ def edit_transaction(transaction_id):
         transaction.notes = form.dropoff_notes.data
         transaction.booking_date = dt.datetime.today()
 
-        transaction.modification_count += 1
-
         db.session.add(transaction)
         db.session.commit()
 
