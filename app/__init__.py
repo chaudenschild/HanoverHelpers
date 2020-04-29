@@ -1,4 +1,5 @@
 from flask import Flask
+import flask_login
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -24,6 +25,22 @@ mail = Mail(app)
 
 from app import models, routes
 
-admin.add_view(ModelView(models.Volunteer, db.session))
-admin.add_view(ModelView(models.Recipient, db.session))
-admin.add_view(ModelView(models.Transaction, db.session))
+ADMIN_USERS = [u'cch360']
+
+class AuthenticatedModelView(ModelView):
+    """
+    This is an awful hack to protect the admin page for now.
+    TODO(thomas): do this in a more secure way.
+    """
+
+    def is_accessible(self):
+        return flask_login.current_user.is_authenticated and flask_login.current_user.get_id() in ADMIN_USERS
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login', next=request.url))
+
+
+
+admin.add_view(AuthenticatedModelView(models.Volunteer, db.session))
+admin.add_view(AuthenticatedModelView(models.Recipient, db.session))
+admin.add_view(AuthenticatedModelView(models.Transaction, db.session))
