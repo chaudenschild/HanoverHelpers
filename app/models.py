@@ -251,6 +251,7 @@ class Volunteer(BaseUser, db.Model):
     phone = db.Column(db.String)
     email = db.Column(db.String, unique=True)
     password_hash = db.Column(db.String(128))
+    admin = db.Column(db.Boolean, default=False)
 
     transactions = db.relationship('Transaction', back_populates='volunteer')
 
@@ -258,6 +259,9 @@ class Volunteer(BaseUser, db.Model):
         user = UserDirectory(username=self.username, user_type='volunteer')
         db.session.add(user)
         db.session.commit()
+
+    def is_admin(self):
+        return self.admin
 
     def __repr__(self):
         return f"<Volunteer(name='{self.name}', username='{self.username}')>"
