@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+  {% if user_type == 'recipient' %}
+    <h2> Recipient Registration </h2>
+  {% elif user_type == 'volunteer' %}
+    <h2> Recipient Registration </h2>
+  {% endif %}
+  <div class="row">
+      <div class="col-md-4">
+        <form class="form form-horizontal" method="post" role="form">
+          {{ form.hidden_tag() }}
+          {{ wtf.form_field(form.username) }}
+          {{ wtf.form_field(form.password) }}
+          {{ wtf.form_field(form.password2) }}
+          {{ wtf.form_field(form.email) }}
+          {{ wtf.form_field(form.phone) }}
+
+          {% if user_type == 'recipient' %}
+            {{ wtf.form_field(form.address) }}
+          {% endif %}
+
+          {{ wtf.form_field(form.submit) }}
+        </form>
+      </div>
+    </div>
+    <br>
+{% endblock %}
