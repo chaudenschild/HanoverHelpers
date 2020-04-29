@@ -311,7 +311,7 @@ def edit_transaction(transaction_id):
 
         flash(f'Delivery modified!')
         send_confirmation(
-            current_user, 'recipient_modification_confirmation', transaction)
+            current_user, 'recipient_modification', transaction)
 
         return redirect(url_for('deliveries', username=current_user.username))
 
