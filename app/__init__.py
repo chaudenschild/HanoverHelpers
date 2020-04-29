@@ -26,10 +26,6 @@ mail = Mail(app)
 from app import models, routes
 
 
-
-ADMIN_USERS = [u'cch360']
-
-
 class AuthenticatedModelView(ModelView):
     """
     This is an awful hack to protect the admin page for now.
@@ -37,7 +33,7 @@ class AuthenticatedModelView(ModelView):
     """
 
     def is_accessible(self):
-        return flask_login.current_user.is_authenticated and (flask_login.current_user.is_admin() or flask_login.current_user.username in ADMIN_USERS)
+        return flask_login.current_user.is_authenticated and flask_login.current_user.is_admin()
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('login', next=request.url))

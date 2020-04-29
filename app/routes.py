@@ -242,8 +242,12 @@ def book():
 
         d = dt.datetime.today()
         if current_user.dropoff_day is not None:
-            while d.weekday() != list(calendar.day_name).index(current_user.dropoff_day):
-                d += dt.timedelta(1)
+            dropoff = list(calendar.day_name).index(current_user.dropoff_day)
+        else:
+            dropoff = 4
+        # default to next Friday
+        while d.weekday() != dropoff:
+            d += dt.timedelta(1)
 
         form.store.data = current_user.store
         form.date.data = d
