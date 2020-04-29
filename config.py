@@ -18,7 +18,6 @@ class Config():
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
     ADMINS = ['hanoverhelpers1@gmail.com']
     CUTOFF_DAYTIME = {'Day': 3, 'Hour': 18}  # Thursday 6PM
 
@@ -30,5 +29,4 @@ class Config():
 (venv) $ export MAIL_USE_TLS=1
 (venv) $ export MAIL_USERNAME=<your-gmail-username>
 (venv) $ export MAIL_PASSWORD=<your-gmail-password>
-(venv) $ export MAIL_DEFAULT_SENDER=hanoverhelpers1@gmail.com
 '''
