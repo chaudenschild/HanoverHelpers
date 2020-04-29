@@ -9,7 +9,7 @@ from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-from app import models, routes
+
 from config import Config
 
 app = Flask(__name__)
@@ -23,6 +23,8 @@ basic_auth = BasicAuth(app)
 admin = Admin(app, name='hanover-helpers', template_mode='bootstrap3')
 bootstrap = Bootstrap(app)
 mail = Mail(app)
+
+from app import models, routes
 
 
 class AuthenticatedModelView(ModelView):
