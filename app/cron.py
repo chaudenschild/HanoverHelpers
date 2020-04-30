@@ -30,5 +30,5 @@ def send_recipient_email(user, transaction):
                    recipients=[transaction.volunteer.email],
                    text_body=render_template('email/volunteer_reminder.txt',
                                              user=transaction.volunteer, date=date_str, transaction=transaction),
-                   html_body=render_template(f'email/volunteer_reminder.html',
-                                             user=transaction.volunteer, date=date_str, transaction=transaction)))
+                   html_body=render_template('email/volunteer_reminder.html',
+                   user=transaction.volunteer, date=date_str, transaction=transaction)))
