@@ -65,6 +65,7 @@ class RegistrationForm(FlaskForm):
 
 
 class RecipientRegistrationForm(RegistrationForm):
+    name = StringField('Full Name', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
@@ -77,6 +78,7 @@ class RecipientRegistrationForm(RegistrationForm):
 
 
 class VolunteerRegistrationForm(RegistrationForm):
+    name = StringField('Full Name', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(

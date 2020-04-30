@@ -1,7 +1,6 @@
 import calendar
 import datetime as dt
 
-import flask
 import pandas as pd
 from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
@@ -79,11 +78,15 @@ def register(user_type):
 
     if form.validate_on_submit():
         if user_type == 'volunteer':
-            user = Volunteer(username=form.username.data,
-                             email=form.email.data, phone=form.phone.data)
+            user = Volunteer(name=form.name,
+                             username=form.username.data,
+                             email=form.email.data,
+                             phone=form.phone.data)
         elif user_type == 'recipient':
-            user = Recipient(username=form.username.data,
-                             email=form.email.data, phone=form.phone.data,
+            user = Recipient(name=form.name,
+                             username=form.username.data,
+                             email=form.email.data,
+                             phone=form.phone.data,
                              address=form.address.data)
 
         user.set_password(form.password.data)
@@ -303,8 +306,6 @@ def edit_transaction(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
 
     if form.validate_on_submit():
-
-        current_date_str = dt.date.today()
 
         transaction.store = form.store.data
         transaction.date = form.date.data
