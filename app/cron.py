@@ -9,7 +9,7 @@ from app.models import Transaction, Volunteer
 # Cron job that sends volunteers their delivery details at specified time (Friday morning 6am)
 @sched.cron_schedule(**app.config['RECIPIENT_EMAIL_SEND_TIME'])
 def send_recipient_email(user, transaction):
-
+    print('chron_job triggered')
     # Transactions this week must have dates earlier than next Thursday 6PM.
     d = dt.datetime.today()
     while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
