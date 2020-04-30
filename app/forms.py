@@ -159,11 +159,10 @@ class TransactionForm(FlaskForm):
         # 6PM
         cutoff = dt.datetime(d.year, d.month, d.day,
                              app.config['CUTOFF_DAYTIME']['Hour'])
-        '''
+
         if dt.datetime.now() > cutoff:
             raise ValidationError(
                 'Please note that the deadline for making changes to your order has passed. If you wish to cancel your order, please call Natalie at 401-575-3142.')
-        '''
 
         if pd.to_datetime(date.data).weekday() not in [4, 5]:
             raise ValidationError(
