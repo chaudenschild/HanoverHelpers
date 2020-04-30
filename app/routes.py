@@ -80,7 +80,8 @@ def register(user_type):
                              email=form.email.data, phone=form.phone.data)
         elif user_type == 'recipient':
             user = Recipient(username=form.username.data,
-                             email=form.email.data, phone=form.phone.data)
+                             email=form.email.data, phone=form.phone.data,
+                             address=form.address.data)
 
         user.set_password(form.password.data)
         db.session.add(user)
