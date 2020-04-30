@@ -1,15 +1,18 @@
 import datetime as dt
 
-import apscheduler.scheduler as sched
+from apscheduler.scheduler import Scheduler
 from flask import render_template
 
 from app import app, db
 from app.emails import send_email
 from app.models import Transaction, Volunteer
 
+sched = Scheduler()
+sched.start()
 
 # Cron job that sends volunteers their delivery details at specified time (Friday morning 6am)
-@sched.cron_schedule(**app.config['RECIPIENT_EMAIL_SEND_TIME'])
+
+
 def send_recipient_email(user, transaction):
     print(f'chron_job triggered {dt.datetime.now()}')
     # Transactions this week must have dates earlier than next Thursday 6PM.
@@ -34,3 +37,7 @@ def send_recipient_email(user, transaction):
                        'email/volunteer_reminder.txt', user=transaction.volunteer, date=date_str, transaction=transaction),
                    html_body=render_template('email/volunteer_reminder.html',
                                              user=transaction.volunteer, date=date_str, transaction=transaction))
+
+
+sched.add_cron_job(send_recipient_email, **
+                   app.config['RECIPIENT_EMAIL_SEND_TIME'])

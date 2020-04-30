@@ -16,4 +16,4 @@ phonenumbers==8.12.2
 email_validator
 gunicorn
 psycopg2
-apscheduler
+APScheduler==3.6.3
