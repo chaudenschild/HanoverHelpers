@@ -20,8 +20,8 @@ class Config():
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['hanoverhelpers1@gmail.com']
     CUTOFF_DAYTIME = {'Day': 3, 'Hour': 18}  # Thursday 6PM
-    RECIPIENT_EMAIL_SEND_TIME = {
-        'day_of_week': 'thu', 'hour': '1', 'minute': '6'}  # Should be friday 6am; different for debugging
+    RECIPIENT_EMAIL_SEND_TIME = {'timezone': 'America/New_York',
+                                 'day_of_week': 'thu', 'hour': '1', 'minute': '12-16/1'}  # Should be friday 6am; different for debugging
 
 
 # Set environment vars for local testing
