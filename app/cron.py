@@ -28,15 +28,13 @@ def send_recipient_email():
 
         date_str = transaction.date.strftime('%A, %m/%d')
         subject = f'Delivery for {transaction.recipient.name} on {date_str}'
-        print(subject)
-        '''
+
         send_email(subject,
                    sender=app.config['ADMINS'][0],
                    recipients=[transaction.volunteer.email],
                    text_body=render_template(
                        'email/volunteer_reminder.txt', date=date_str, transaction=transaction),
                    html_body=render_template('email/volunteer_reminder.html', date=date_str, transaction=transaction))
-        '''
 
 
 sched.start()
