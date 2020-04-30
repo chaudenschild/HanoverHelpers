@@ -9,7 +9,6 @@ from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-
 from config import Config
 
 app = Flask(__name__)
@@ -50,7 +49,7 @@ class PrimaryKeyModelView(AuthenticatedModelView):
 
 
 admin.add_view(PrimaryKeyModelView(models.UserDirectory,
-                                   db.session, list_columns=['username', 'user_type']))
+                                   db.session, column_list=['username', 'user_type']))
 admin.add_view(AuthenticatedModelView(models.Volunteer, db.session))
 admin.add_view(AuthenticatedModelView(models.Recipient, db.session))
 admin.add_view(AuthenticatedModelView(models.Transaction, db.session))

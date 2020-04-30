@@ -41,7 +41,7 @@ def send_confirmation(user, confirmation_type, transaction):
         template = 'recipient_modification_confirmation'
 
     date_str = transaction.date.strftime('%A, %m/%d')
-    subject = f'Delivery confirmed for {date_str}' if confirmation_type == 'booking' else f'Delivery claimed for {date_str}'
+    subject = f'Delivery confirmed for {date_str}' if confirmation_type == 'recipient_booking' else f'Delivery claimed for {date_str}'
     send_email(subject,
                sender=app.config['ADMINS'][0],
                recipients=[user.email],
@@ -49,13 +49,3 @@ def send_confirmation(user, confirmation_type, transaction):
                                          user=user, date=date_str, transaction=transaction),
                html_body=render_template(f'email/{template}.html',
                                          user=user, date=date_str, transaction=transaction))
-
-
-# TODO: volunteer notification
-
-
-# TODO: recipient notifications
-#
-# order picked up
-# Change order
-# delivery status changed

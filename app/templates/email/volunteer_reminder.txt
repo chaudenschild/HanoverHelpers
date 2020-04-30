@@ -1,0 +1,37 @@
+Dear {{ transaction.volunteer.name }},
+
+Thank you for volunteering to deliver groceries/essential items to {{ transaction.recipient.name }} today, {{ date }}! Please see below for details related to your delivery.
+
+Recipient Name:
+
+{{ transaction.recipient.name }}
+
+Phone Number:
+
+{{ transaction.recipient.phone }}
+
+Drop off Location:
+
+{{ transaction.recipient.address }}
+
+Payment Notes:
+
+{{ transaction.recipient.payment_notes }}
+
+Other Notes:
+
+{{ transaction.notes }}
+
+Store:
+
+{{ transaction.user.store }}
+
+Grocery List:
+
+{{ transaction.user.store }}
+
+Please call Natalie at 401-575-3142 know if you have any questions or run into any issues.
+
+Please let us know if you have any questions or run into any issues.
+Thank you,
+The “Hanover Helpers” team

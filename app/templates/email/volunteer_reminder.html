@@ -1,0 +1,43 @@
+<p>Dear {{ transaction.volunteer.name }},</p>
+
+<p>Thank you for volunteering to deliver groceries/essential items to {{ transaction.recipient.name }} today, {{ date }}! Please see below for details related to your delivery.</p>
+
+<p><h4>Recipient Name:</h4></p>
+
+{{ transaction.recipient.name }}
+
+<p><h4>Phone Number:</h4></p>
+
+{{ transaction.recipient.phone }}
+
+<p><h4>Drop off Location:</h4></p>
+
+{{ transaction.recipient.address }}
+
+<p><h4>Payment Notes:</h4></p>
+
+<p>
+{% for elem in recipient.print_payment_notes() %}
+  <li>{{ elem }}</li>
+{% endfor %}
+</p>
+
+<p><h4>Other Notes:</h4></p>
+
+{{ transaction.notes }}
+
+<p><h4>Store:</h4></p>
+
+{{ transaction.recipient.store }}
+
+<p><h4>Grocery List:</h4></p>
+<p>
+{% for elem in transaction.print_list() %}
+  <li>{{ elem }}</li>
+{% endfor %}
+</p>
+
+<p>Please call Natalie at 401-575-3142 if you have any questions or run into any issues.</p>
+
+<p>Thank you,</p>
+<p>The “Hanover Helpers” team</p>

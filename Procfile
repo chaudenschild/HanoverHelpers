@@ -1,1 +1,2 @@
-web: gunicorn app:app; flask db upgrade
+web: gunicorn hanover_helpers:app; flask db upgrade
+clock: python cron.py

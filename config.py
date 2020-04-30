@@ -20,13 +20,15 @@ class Config():
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['hanoverhelpers1@gmail.com']
     CUTOFF_DAYTIME = {'Day': 3, 'Hour': 18}  # Thursday 6PM
+    RECIPIENT_EMAIL_SEND_TIME = {
+        'day_of_week': 'wed', 'hour': 21, 'minute': 28}  # Friday 6AM
 
 
-# Set global vars for local testing
+# Set environment vars for local testing
 '''
 (venv) $ export MAIL_SERVER=smtp.googlemail.com
 (venv) $ export MAIL_PORT=587
 (venv) $ export MAIL_USE_TLS=1
-(venv) $ export MAIL_USERNAME=<your-gmail-username>
+(venv) $ export MAIL_USERNAME=<your-gmail-username> + the @gmail.com
 (venv) $ export MAIL_PASSWORD=<your-gmail-password>
 '''

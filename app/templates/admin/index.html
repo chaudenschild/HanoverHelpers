@@ -1,5 +1,10 @@
 {% extends 'admin/master.html' %}
 
+{% block head %}
+{{ super() }}
+ <link rel="shortcut icon" href="{{ url_for('static', filename='natalie.jpg' )}}" type="image/gif"/>
+{% endblock %}
+
 {% block body %}
 
 {% endblock %}
