@@ -9,15 +9,14 @@ from app.models import Transaction, Volunteer
 # Cron job that sends volunteers their delivery details at specified time (Friday morning 6am)
 @sched.cron_schedule(**app.config['RECIPIENT_EMAIL_SEND_TIME'])
 def send_recipient_email(user, transaction):
-    print('chron_job triggered')
+    print(f'chron_job triggered {dt.datetime.now()}')
     # Transactions this week must have dates earlier than next Thursday 6PM.
     d = dt.datetime.today()
     while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
         d += dt.timedelta(1)
     next_week_cutoff = dt.datetime(d.year, d.month, d.day,
                          app.config['CUTOFF_DAYTIME']['Hour'])
-
-    next_week_cutoff = dt.datetime(2020, 5, 7)
+    next_week_cutoff = dt.datetime(2020, 5, 3)
     transactions = db.session.query(Transaction).join(Volunteer).filter(
         Transaction.date >= dt.datetime.today()).filter(Transaction.date < next_week_cutoff)
 
