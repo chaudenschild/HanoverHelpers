@@ -17,7 +17,7 @@
 <p><h4>Payment Notes:</h4></p>
 
 <p>
-{% if transaction.recipient.print_list() %}
+{% if transaction.recipient.print_payment_notes() %}
   {% for elem in transaction.recipient.print_payment_notes() %}
     <li>{{ elem }}</li>
   {% endfor %}

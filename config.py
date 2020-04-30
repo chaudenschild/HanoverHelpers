@@ -21,7 +21,7 @@ class Config():
     ADMINS = ['hanoverhelpers@gmail.com']
     CUTOFF_DAYTIME = {'Day': 3, 'Hour': 18}  # Thursday 6PM
     RECIPIENT_EMAIL_SEND_TIME = {'timezone': 'America/New_York',
-                                 'day_of_week': 'thu', 'hour': '2', 'minute': '4-6/1'}  # Should be friday 6am; different for debugging
+                                 'day_of_week': 'thu', 'hour': '2', 'minute': '6-9/1'}  # Should be friday 6am; different for debugging
 
 
 # Set environment vars for local testing
