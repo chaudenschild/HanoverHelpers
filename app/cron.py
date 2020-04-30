@@ -11,7 +11,7 @@ sched = BlockingScheduler()
 
 
 # Cron job that sends volunteers their delivery details at specified time (Friday morning 6am)
-@sched.scheduled_job('cron', **app.config['RECIPIENT_EMAIL_SEND_TIME'])
+# @sched.scheduled_job('cron', **app.config['RECIPIENT_EMAIL_SEND_TIME'])
 def send_recipient_email():
     print(f'chron_job triggered {dt.datetime.now()}')
     # Transactions this week must have dates earlier than next Thursday 6PM.
@@ -23,7 +23,7 @@ def send_recipient_email():
     next_week_cutoff = dt.datetime(2020, 5, 3)
     transactions = Transaction.query.filter(
         Transaction.date >= dt.datetime.today()).filter(Transaction.date < next_week_cutoff).filter(Transaction.claimed == True)
-
+    breakpoint()
     for transaction in transactions:
 
         date_str = transaction.date.strftime('%A, %m/%d')
@@ -33,9 +33,8 @@ def send_recipient_email():
                    sender=app.config['ADMINS'][0],
                    recipients=[transaction.volunteer.email],
                    text_body=render_template(
-                       'email/volunteer_reminder.txt', user=transaction.volunteer, date=date_str, transaction=transaction),
-                   html_body=render_template('email/volunteer_reminder.html',
-                                             user=transaction.volunteer, date=date_str, transaction=transaction))
+                       'email/volunteer_reminder.txt', date=date_str, transaction=transaction),
+                   html_body=render_template('email/volunteer_reminder.html', date=date_str, transaction=transaction))
 
 
-sched.start()
+# sched.start()
