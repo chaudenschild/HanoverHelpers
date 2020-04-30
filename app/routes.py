@@ -143,8 +143,7 @@ def reset_password(token):
 @login_required
 def edit_user_info(username):
 
-    form = RecipientInfoForm() if current_user.get_user_type(
-    ) == 'recipient' else VolunteerInfoForm()
+    form = RecipientInfoForm() if current_user.user_type == 'recipient' else VolunteerInfoForm()
 
     if form.validate_on_submit():
 
@@ -169,21 +168,21 @@ def edit_user_info(username):
         if type(form) == RecipientInfoForm:
             form.address.data = current_user.address
 
-    return render_template('user_info_form.html', form=form, usertype=current_user.get_user_type())
+    return render_template('user_info_form.html', form=form, usertype=current_user.user_type)
 
 
 @app.route('/user/<username>/profile')
 @login_required
 def user(username):
 
-    return render_template('user/profile.html', user=current_user, usertype=current_user.get_user_type())
+    return render_template('user/profile.html', user=current_user, usertype=current_user.user_type)
 
 
 @app.route('/user/<username>/deliveries')
 @login_required
 def deliveries(username):
 
-    return render_template('user/deliveries.html', user=current_user, usertype=current_user.get_user_type())
+    return render_template('user/deliveries.html', user=current_user, usertype=current_user.user_type)
 
 
 @app.route('/user/<username>/edit_login', methods=["GET", "POST"])

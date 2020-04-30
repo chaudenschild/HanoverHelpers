@@ -110,6 +110,9 @@ class UserDirectory(db.Model):
     username = db.Column(db.String(64))
     user_type = db.Column(db.String())
 
+    def __repr__(self):
+        return f"<User(username='{self.username}', user_name='{self.user_type}')>"
+
 
 class BaseUser(UserMixin):
 
@@ -119,7 +122,7 @@ class BaseUser(UserMixin):
 
     @user_type.setter
     def user_type(self, type):
-        dir_listing = session.query(
+        dir_listing = db.session.query(
             UserDirectory).filter_by(username=self.username).first()
         if dir_listing is None:
             new_listing = UserDirectory(username=self.username, user_type=type)
