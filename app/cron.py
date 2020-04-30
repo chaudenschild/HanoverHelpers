@@ -28,9 +28,6 @@ def send_recipient_email():
 
         date_str = transaction.date.strftime('%A, %m/%d')
         subject = f'Delivery for {transaction.recipient.name} on {date_str}'
-        print(app.config['ADMINS'][0])
-        print(transaction.volunteer.email)
-        print(transaction.recipient)
 
         with app.app_context():
             send_email(subject,

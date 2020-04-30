@@ -24,11 +24,11 @@ Other Notes:
 
 Store:
 
-{{ transaction.user.store }}
+{{ transaction.store }}
 
 Grocery List:
 
-{{ transaction.user.store }}
+{{ transaction.list }}
 
 Please call Natalie at 401-575-3142 know if you have any questions or run into any issues.
 
