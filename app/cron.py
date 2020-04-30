@@ -1,10 +1,10 @@
 import datetime as dt
-from email import send_email
 
 import apscheduler.scheduler as sched
 from flask import render_template
 
 from app import app, db
+from app.emails import send_email
 from app.models import Transaction, Volunteer
 
 

@@ -6,7 +6,7 @@ from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from app import app, basic_auth, db
-from app.email import send_confirmation, send_password_reset
+from app.emails import send_confirmation, send_password_reset
 from app.forms import (DeliveryPreferencesForm, EditLoginForm, InvoiceForm,
                        LoginForm, RecipientInfoForm, RecipientRegistrationForm,
                        ResetPasswordEmailForm, ResetPasswordForm,
