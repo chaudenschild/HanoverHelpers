@@ -1,6 +1,8 @@
+import datetime as dt
 from email import send_email
 
-from apscheduler.scheduler import Scheduler
+import apscheduler.scheduler as sched
+from flask import render_template
 
 from app import app, db
 from app.models import Transaction, Volunteer
@@ -15,7 +17,7 @@ def send_recipient_email(user, transaction):
     while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
         d += dt.timedelta(1)
     next_week_cutoff = dt.datetime(d.year, d.month, d.day,
-                         app.config['CUTOFF_DAYTIME']['Hour'])
+                                   app.config['CUTOFF_DAYTIME']['Hour'])
     next_week_cutoff = dt.datetime(2020, 5, 3)
     transactions = db.session.query(Transaction).join(Volunteer).filter(
         Transaction.date >= dt.datetime.today()).filter(Transaction.date < next_week_cutoff)
@@ -28,7 +30,7 @@ def send_recipient_email(user, transaction):
         send_email(subject,
                    sender=app.config['ADMINS'][0],
                    recipients=[transaction.volunteer.email],
-                   text_body=render_template('email/volunteer_reminder.txt',
-                                             user=transaction.volunteer, date=date_str, transaction=transaction),
+                   text_body=render_template(
+                       'email/volunteer_reminder.txt', user=transaction.volunteer, date=date_str, transaction=transaction),
                    html_body=render_template('email/volunteer_reminder.html',
-                   user=transaction.volunteer, date=date_str, transaction=transaction)))
+                                             user=transaction.volunteer, date=date_str, transaction=transaction))
