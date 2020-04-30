@@ -86,7 +86,6 @@ def transaction_signup_view(completed=None, claimed=None):
                   Recipient.name,
                   Transaction.store,
                   Transaction.date,
-                  Transaction.list,
                   Transaction.notes
                   ]
 
@@ -95,13 +94,14 @@ def transaction_signup_view(completed=None, claimed=None):
     elif claimed is not None:
         filter_statement = Transaction.claimed == claimed
 
-    query = db.session.query(*query_list).filter(filter_statement)
+    query = db.session.query(
+        *query_list).join(Recipient).filter(filter_statement)
 
     table = Table(query)
     table.add_transaction_link_column('signup_transaction', 'Pickup')
     table.add_transaction_link_column('view_list', 'View List/Notes')
 
-    return table.make_html(drop_cols=['list'])
+    return table.make_html(drop_cols=None)
 
 
 class UserDirectory(db.Model):
@@ -218,7 +218,7 @@ class Recipient(BaseUser, db.Model):
     username = db.Column(db.String(64), db.ForeignKey(
         'userdirectory.username'), unique=True)
     name = db.Column(db.String)
-    email = db.Column(db.String, unique=True)
+    email = db.Column(db.String)
     phone = db.Column(db.String)
     address = db.Column(db.String)
     store = db.Column(db.String)
@@ -249,7 +249,7 @@ class Volunteer(BaseUser, db.Model):
         'userdirectory.username'), unique=True)
     name = db.Column(db.String)
     phone = db.Column(db.String)
-    email = db.Column(db.String, unique=True)
+    email = db.Column(db.String)
     password_hash = db.Column(db.String(128))
     admin = db.Column(db.Boolean, default=False)
 

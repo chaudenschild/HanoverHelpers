@@ -9,9 +9,10 @@ from flask_login import current_user, login_required, login_user, logout_user
 from app import app, basic_auth, db
 from app.email import send_confirmation, send_password_reset
 from app.forms import (DeliveryPreferencesForm, EditLoginForm, InvoiceForm,
-                       LoginForm, RecipientInfoForm, RegistrationForm,
+                       LoginForm, RecipientInfoForm, RecipientRegistrationForm,
                        ResetPasswordEmailForm, ResetPasswordForm,
-                       TransactionForm, UserTypeForm, VolunteerInfoForm)
+                       TransactionForm, UserTypeForm, VolunteerInfoForm,
+                       VolunteerRegistrationForm)
 from app.models import (BaseUser, Recipient, Transaction, Volunteer, get_user,
                         transaction_signup_view)
 
@@ -72,7 +73,9 @@ def register(user_type):
     if current_user.is_authenticated:
         return redirect(url_for('user', username=current_user.username))
 
-    form = RegistrationForm()
+    form = RecipientRegistrationForm(
+    ) if user_type == 'recipient' else VolunteerRegistrationForm()
+    header = f'{user_type.capitalize()} Registration'
 
     if form.validate_on_submit():
         if user_type == 'volunteer':
@@ -89,7 +92,9 @@ def register(user_type):
         flash('Thank you for registering for Hanover Helpers!')
         login_user(user)
         return redirect(url_for('deliveries', username=current_user.username))
-    return render_template('registration_form.html', user_type=user_type, form=form)
+
+    return render_template('standard_form.html', header=header, form=form)
+    # return render_template('registration_form.html', user_type=user_type, form=form)
 
 
 @app.route('/reset_password_email', methods=['GET', 'POST'])

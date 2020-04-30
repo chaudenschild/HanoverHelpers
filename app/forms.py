@@ -39,29 +39,6 @@ class UserTypeForm(FlaskForm):
     submit = SubmitField('Register')
 
 
-class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    password2 = PasswordField(
-        'Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    phone = StringField('Phone number', validators=[DataRequired()])
-    address = SelectField('Address (if Other, please provide address in Delivery Notes)', choices=[
-        (x, x) for x in ['Kendal', 'Other']],
-        validators=[DataRequired()])
-    submit = SubmitField('Register')
-
-    def validate_username(self, username):
-
-        user_vol = Volunteer.query.filter_by(
-            username=username.data).first()
-        user_rec = Recipient.query.filter_by(
-            username=username.data).first()
-
-        if user_vol is not None or user_rec is not None:  # check uniqueness in both user types
-            raise ValidationError('Username already in use.')
-
-
 class EditLoginForm(FlaskForm):
     old_password = PasswordField('Old Password', validators=[DataRequired()])
     new_password = PasswordField('New Password', validators=[DataRequired()])
@@ -73,6 +50,40 @@ class EditLoginForm(FlaskForm):
 
         if not current_user.check_password(old_password.data):
             raise ValidationError('Incorrect password')
+
+
+class RegistrationForm(FlaskForm):
+    def validate_username(self, username):
+
+        user_vol = Volunteer.query.filter_by(
+            username=username.data).first()
+        user_rec = Recipient.query.filter_by(
+            username=username.data).first()
+
+        if user_vol is not None or user_rec is not None:  # check uniqueness in both user types
+            raise ValidationError('Username already in use.')
+
+
+class RecipientRegistrationForm(RegistrationForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    phone = StringField('Phone number', validators=[DataRequired()])
+    address = SelectField('Address (if Other, please provide address in Delivery Notes)', choices=[
+        (x, x) for x in ['Kendal', 'Other']], validators=[DataRequired()])
+    submit = SubmitField('Register')
+
+
+class VolunteerRegistrationForm(RegistrationForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    phone = StringField('Phone number', validators=[DataRequired()])
+    submit = SubmitField('Register')
 
 
 class InfoForm(FlaskForm):

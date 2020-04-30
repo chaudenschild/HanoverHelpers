@@ -1,5 +1,5 @@
 import flask_login
-from flask import Flask
+from flask import Flask, redirect, url_for, request
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_basicauth import BasicAuth
@@ -24,7 +24,6 @@ bootstrap = Bootstrap(app)
 mail = Mail(app)
 
 from app import models, routes
-
 
 class AuthenticatedModelView(ModelView):
     """
