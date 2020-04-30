@@ -78,12 +78,12 @@ def register(user_type):
 
     if form.validate_on_submit():
         if user_type == 'volunteer':
-            user = Volunteer(name=form.name,
+            user = Volunteer(name=form.name.data,
                              username=form.username.data,
                              email=form.email.data,
                              phone=form.phone.data)
         elif user_type == 'recipient':
-            user = Recipient(name=form.name,
+            user = Recipient(name=form.name.data,
                              username=form.username.data,
                              email=form.email.data,
                              phone=form.phone.data,
