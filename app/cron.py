@@ -11,7 +11,7 @@ sched = BlockingScheduler()
 
 
 # Cron job that sends volunteers their delivery details at specified time (Friday morning 6am)
-
+'''
 @sched.scheduled_job('cron', **app.config['RECIPIENT_EMAIL_SEND_TIME'])
 def send_recipient_email():
     print(f'chron_job triggered {dt.datetime.now()}')
@@ -37,6 +37,12 @@ def send_recipient_email():
                        'email/volunteer_reminder.txt', user=transaction.volunteer, date=date_str, transaction=transaction),
                    html_body=render_template('email/volunteer_reminder.html',
                                              user=transaction.volunteer, date=date_str, transaction=transaction))
+'''
+
+
+@sched.scheduled_job('cron', hour='0-6', minute='0-59/1')
+def chron_test():
+    print(f'chron_job triggered')
 
 
 sched.start()
