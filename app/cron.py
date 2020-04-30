@@ -1,18 +1,18 @@
 import datetime as dt
 
-from apscheduler.scheduler import Scheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 from flask import render_template
 
 from app import app, db
 from app.emails import send_email
 from app.models import Transaction, Volunteer
 
-sched = Scheduler()
-sched.start()
+sched = BlockingScheduler()
+
 
 # Cron job that sends volunteers their delivery details at specified time (Friday morning 6am)
 
-
+@sched.scheduled_job('cron', **app.config['RECIPIENT_EMAIL_SEND_TIME'])
 def send_recipient_email(user, transaction):
     print(f'chron_job triggered {dt.datetime.now()}')
     # Transactions this week must have dates earlier than next Thursday 6PM.
@@ -39,5 +39,4 @@ def send_recipient_email(user, transaction):
                                              user=transaction.volunteer, date=date_str, transaction=transaction))
 
 
-sched.add_cron_job(send_recipient_email, **
-                   app.config['RECIPIENT_EMAIL_SEND_TIME'])
+sched.start()
