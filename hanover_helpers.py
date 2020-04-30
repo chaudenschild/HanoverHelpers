@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, cron, db
 from app.models import Recipient, Transaction, UserDirectory, Volunteer
 
 
