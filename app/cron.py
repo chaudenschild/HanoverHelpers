@@ -21,7 +21,7 @@ def send_recipient_email():
     next_week_cutoff = dt.datetime(d.year, d.month, d.day,
                                    app.config['CUTOFF_DAYTIME']['Hour'])
     next_week_cutoff = dt.datetime(2020, 5, 3)
-    transactions = Transaction.filter(
+    transactions = Transaction.query.filter(
         Transaction.date >= dt.datetime.today()).filter(Transaction.date < next_week_cutoff).filter(Transaction.claimed == True)
 
     for transaction in transactions:
