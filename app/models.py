@@ -106,28 +106,33 @@ def transaction_signup_view(completed=None, claimed=None):
 
 class UserDirectory(db.Model):
     __tablename__ = 'userdirectory'
-    username = db.Column(db.String(64), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64))
     user_type = db.Column(db.String())
 
 
 class BaseUser(UserMixin):
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._populate_userdir()
+    @property
+    def user_type(self):
+        return self.directory_listing.user_type
 
-    def _populate_userdir(self):
-        pass
-
-    def get_user_type(self):
-        userdir = UserDirectory.query.filter_by(username=self.username).first()
-        return userdir.user_type
+    @user_type.setter
+    def user_type(self, type):
+        dir_listing = session.query(
+            UserDirectory).filter_by(username=self.username).first()
+        if dir_listing is None:
+            new_listing = UserDirectory(username=self.username, user_type=type)
+            self.directory_listing = new_listing
+            db.session.add(new_listing)
+            db.session.commit()
+        else:
+            self.directory_listing.user_type = type
 
     def user_table(self):
-        user_type = self.get_user_type()
-        if user_type == 'volunteer':
+        if self.user_type == 'volunteer':
             return Volunteer
-        elif user_type == 'recipient':
+        elif self.user_type == 'recipient':
             return Recipient
 
     def avatar(self, size):
@@ -144,7 +149,7 @@ class BaseUser(UserMixin):
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': self.id,
-             'user_type': self.get_user_type(),
+             'user_type': self.user_type,
              'exp': time.time() + expires_in},
             app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
@@ -168,7 +173,7 @@ class BaseUser(UserMixin):
 
     def get_transactions(self, completed, html=True):
 
-        User, user_type = self.user_table(), self.get_user_type()
+        User, user_type = self.user_table(), self.user_type
         Counterpart = Volunteer if user_type == 'recipient' else Recipient
         counterpart_type = 'volunteer' if user_type == 'recipient' else 'recipient'
 
@@ -228,15 +233,15 @@ class Recipient(BaseUser, db.Model):
     password_hash = db.Column(db.String(128))
 
     transactions = db.relationship('Transaction', back_populates='recipient')
+    directory_listing = db.relationship(
+        'UserDirectory', uselist=False, cascade='delete')
 
-    def _populate_userdir(self):
-        user = UserDirectory(username=self.username, user_type='recipient')
-        db.session.add(user)
-        db.session.commit()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.user_type = 'recipient'
 
     def print_payment_notes(self):
-        if self.payment_notes:
-            return self.payment_notes.split('/n')
+        return self.payment_notes.split('/n') if self.payment_notes else ''
 
     def __repr__(self):
         return f"<Recipient(name='{self.name}', username='{self.username}')>"
@@ -254,11 +259,12 @@ class Volunteer(BaseUser, db.Model):
     admin = db.Column(db.Boolean, default=False)
 
     transactions = db.relationship('Transaction', back_populates='volunteer')
+    directory_listing = db.relationship(
+        'UserDirectory', uselist=False, cascade='delete')
 
-    def _populate_userdir(self):
-        user = UserDirectory(username=self.username, user_type='volunteer')
-        db.session.add(user)
-        db.session.commit()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.user_type = 'volunteer'
 
     def is_admin(self):
         return self.admin
@@ -311,8 +317,7 @@ class Transaction(db.Model):
         self.invoice = amount
 
     def print_list(self):
-        if self.list:
-            return self.list.split('\n')
+        return self.list.split('\n') if self.list else ''
 
     def recipient_name(self):
         return self.recipient.name
