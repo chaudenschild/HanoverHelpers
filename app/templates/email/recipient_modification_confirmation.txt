@@ -1,4 +1,4 @@
-Dear {{ user.username }},
+Dear {{ user.name }},
 
 We’ve received the change(s) you made to your order to be delivered on
 {{ date }}.

@@ -1,11 +1,10 @@
 import datetime as dt
 
 from apscheduler.schedulers.blocking import BlockingScheduler
-from flask import render_template
 
-from app import app, db
-from app.emails import send_email
-from app.models import Transaction, Volunteer
+from app import app
+from app.emails import send_confirmation
+from app.models import Transaction
 
 sched = BlockingScheduler()
 
@@ -26,16 +25,8 @@ def send_recipient_email():
 
     for transaction in transactions:
 
-        date_str = transaction.date.strftime('%A, %m/%d')
-        subject = f'Delivery for {transaction.recipient.name} on {date_str}'
-
-        with app.app_context():
-            send_email(subject,
-                       sender=app.config['ADMINS'][0],
-                       recipients=[transaction.volunteer.email],
-                       text_body=render_template(
-                           'email/volunteer_reminder.txt', date=date_str, transaction=transaction),
-                       html_body=render_template('email/volunteer_reminder.html', date=date_str, transaction=transaction))
+        send_confirmation(transaction.volunteer.email,
+                          'volunteer_reminder', transaction)
 
 
 sched.start()

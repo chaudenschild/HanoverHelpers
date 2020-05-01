@@ -33,15 +33,17 @@ def send_password_reset(user):
 
 
 def send_confirmation(user, confirmation_type, transaction):
+    date_str = transaction.date.strftime('%A, %m/%d')
     if confirmation_type == 'recipient_booking':
         template = 'recipient_booking_confirmation'
+        subject = f'Delivery confirmed for {date_str}'
     elif confirmation_type == 'volunteer_claimed':
         template = 'volunteer_claimed_confirmation'
-    elif confirmation_type == 'recipient_modification':
-        template = 'recipient_modification_confirmation'
-
-    date_str = transaction.date.strftime('%A, %m/%d')
-    subject = f'Delivery confirmed for {date_str}' if confirmation_type == 'recipient_booking' else f'Delivery claimed for {date_str}'
+        subject = f'Delivery claimed for {date_str}'
+    elif confirmation_type == 'volunteer_reminder':
+        template = 'volunteer_reminder'
+        #subject = f'Delivery reminder for {transaction.recipient.name}, {date_str}'
+        subject = 'If you see this, Christian is not dumb'
     send_email(subject,
                sender=app.config['ADMINS'][0],
                recipients=[user.email],
