@@ -24,9 +24,9 @@ def send_recipient_email():
         Transaction.date >= dt.datetime.today()).filter(Transaction.date < next_week_cutoff).filter(Transaction.claimed == True).all()
 
     for transaction in transactions:
-
-        send_confirmation(transaction.volunteer,
-                          'volunteer_reminder', transaction)
+        with app.app_context():
+            send_confirmation(transaction.volunteer,
+                              'volunteer_reminder', transaction)
 
 
 sched.start()
