@@ -1,4 +1,4 @@
-Dear {{ user.username }},
+Dear {{ user.name }},
 Thank you for volunteering to deliver groceries/essential items to {{ transaction.recipient.name }} on {{ date }}.
 
 The recipient may make changes to their order before Thursday evening. You will
