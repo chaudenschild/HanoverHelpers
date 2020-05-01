@@ -5,9 +5,9 @@ import phonenumbers
 from flask import flash
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import (BooleanField, PasswordField, RadioField, SelectField,
-                     SelectMultipleField, StringField, SubmitField,
-                     TextAreaField, widgets)
+from wtforms import (BooleanField, FloatField, PasswordField, RadioField,
+                     SelectField, SelectMultipleField, StringField,
+                     SubmitField, TextAreaField, widgets)
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
@@ -56,12 +56,9 @@ class EditLoginForm(FlaskForm):
 class RegistrationForm(FlaskForm):
     def validate_username(self, username):
 
-        user_vol = Volunteer.query.filter_by(
-            username=username.data).first()
-        user_rec = Recipient.query.filter_by(
-            username=username.data).first()
+        user = UserDirectory.query.filter_by(username=username).first()
 
-        if user_vol is not None or user_rec is not None:  # check uniqueness in both user types
+        if user is not None:  # check uniqueness in both user types
             raise ValidationError('Username already in use.')
 
 
@@ -184,5 +181,5 @@ class TransactionForm(FlaskForm):
 
 
 class InvoiceForm(FlaskForm):
-    invoice = StringField('Amount')
+    invoice = FloatField('Amount')
     submit = SubmitField('Submit')
