@@ -2,17 +2,15 @@ import datetime as dt
 
 import pandas as pd
 import phonenumbers
-from flask import flash
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, FloatField, PasswordField, RadioField,
-                     SelectField, SelectMultipleField, StringField,
-                     SubmitField, TextAreaField, widgets)
+                     SelectField, StringField, SubmitField, TextAreaField)
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
 from app import app, db
-from app.models import Recipient, Transaction, Volunteer, get_user
+from app.models import Recipient, Transaction, UserDirectory
 
 
 class LoginForm(FlaskForm):
