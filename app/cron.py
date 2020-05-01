@@ -25,7 +25,7 @@ def send_recipient_email():
 
     for transaction in transactions:
 
-        send_confirmation(transaction.volunteer.email,
+        send_confirmation(transaction.volunteer,
                           'volunteer_reminder', transaction)
 
 
