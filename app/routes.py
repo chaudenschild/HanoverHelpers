@@ -168,7 +168,7 @@ def edit_user_info(username):
         if type(form) == RecipientInfoForm:
             form.address.data = current_user.address
 
-    return render_template('user_info_form.html', form=form, usertype=current_user.user_type)
+    return render_template('standard_form.html', form=form, header='Edit User Info')
 
 
 @app.route('/user/<username>/profile')
