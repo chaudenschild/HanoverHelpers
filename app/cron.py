@@ -21,16 +21,12 @@ def send_recipient_email():
                                    app.config['CUTOFF_DAYTIME']['Hour'])
 
     transactions = Transaction.query.filter(
-        Transaction.date >= dt.datetime.today().date() - dt.timedelta(2)).filter(Transaction.date < next_week_cutoff).filter(Transaction.claimed == True).all()
-    print(f'length transactions = {len(transactions)}')
+        Transaction.date >= dt.datetime.today().date()).filter(Transaction.date < next_week_cutoff).filter(Transaction.claimed == True).all()
+
     with app.app_context():
         for transaction in transactions:
-            vol = transaction.volunteer
-            print(vol.email)
-            if vol.email == 'alexandria.t.wood.tu20@tuck.dartmouth.edu':
-
-                send_confirmation(vol,
-                                  'volunteer_reminder', transaction)
+            send_confirmation(transaction.volunteer,
+                              'volunteer_reminder', transaction)
 
 
 sched.start()
