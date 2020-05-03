@@ -14,17 +14,17 @@
 
 {{ transaction.recipient.address }}
 
+<p><h4>Additional Address Info:</h4></p>
+
+{{ transaction.recipient.address_notes }}
+
+<p><h4>Payment Type:</h4></p>
+
+{{ transaction.payment_type }}
+
 <p><h4>Payment Notes:</h4></p>
 
-<p>
-{% if transaction.recipient.print_payment_notes() %}
-  {% for elem in transaction.recipient.print_payment_notes() %}
-    <li>{{ elem }}</li>
-  {% endfor %}
-  </p>
-{% else %}
-<p> No payment notes </p>
-{% endif %}
+{{ transaction.payment_notes }}
 
 <p><h4>Other Notes:</h4></p>
 
@@ -40,7 +40,6 @@
   <li>{{ elem }}</li>
 {% endfor %}
 </p>
-
 
 
 <p>Please call Natalie at 401-575-3142 if you have any questions or run into any issues.</p>

@@ -1,107 +1,47 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-  {% if usertype == 'volunteer' %}
-    <div class='row' style='margin-bottom:30px'>
-      <table>
-        <tr valign="middle">
-            <td><img src="{{ user.avatar(64) }}"></td>
-            <td><h2> {{ user.username }}'s Profile </h2></td>
-        </tr>
-      </table>
-    </div>
+  <div class='row' style='margin-bottom:30px'>
+    <table>
+      <tr valign="middle">
+          <td><img src="{{ user.avatar(64) }}"></td>
+          <td><h2> {{ user.username }}'s Profile </h2></td>
+      </tr>
+    </table>
+  </div>
 
-    <div class='flex-container'>
-      <div class='row'>
-        <div class='col-lg-12'>
+  <div class='flex-container'>
+    <div class='row'>
+      <div class='col-lg-12'>
 
-          <h3> Preferences </h3>
+        <h3> Preferences </h3>
+          <p>
+            <h4> Name </h4>
+            {{ user.name }} <br>
+          </p>
+          <p>
+            <h4> Email </h4>
+            {{ user.email }} <br>
+          </p>
+          <p>
+            <h4> Phone </h4>
+            {{ user.phone }} <br>
+          </p>
+          {% if usertype== 'recipient'%}
             <p>
-              <h4> Name </h4>
-              {{ user.name }} <br>
+              <h4> Address </h4>
+              {{ user.address }} <br>
             </p>
             <p>
-              <h4> Email </h4>
-              {{ user.email }} <br>
+              <h4> Address Notes </h4>
+              {{ user.address_notes }} <br>
             </p>
-            <p>
-              <h4> Phone </h4>
-              {{ user.phone }} <br>
-            </p>
-        <p><a class="btn btn-primary btn-md" href="{{ url_for('edit_user_info', username=current_user.username) }}" role="button">Edit User Info</a></p>
-        <p><a href='{{ url_for('edit_login', username=current_user.username) }}' style='font-size: 15px'>Change password</a></p>
-        </div>
+          {% endif %}
+
+      <p><a class="btn btn-primary btn-md" href="{{ url_for('edit_user_info', username=current_user.username) }}" role="button">Edit User Info</a></p>
+      <p><a href='{{ url_for('edit_login', username=current_user.username) }}' style='font-size: 15px'>Change password</a></p>
       </div>
     </div>
+  </div>
 
-  {% elif usertype == 'recipient' %}
-    <div class='row' style='margin-bottom:30px'>
-      <table>
-        <tr valign="middle">
-            <td><img src="{{ user.avatar(64) }}"></td>
-            <td><h2> {{ user.username }}'s Profile </h2></td>
-        </tr>
-      </table>
-    </div>
-
-    <div class='flex-container'>
-      <div class='row'>
-        <div class='col-lg-12'>
-
-          <div>
-            <h3> Preferences </h3>
-              <p>
-                <h4> Name </h4>
-                {{ user.name }} <br>
-              </p>
-              <p>
-                <h4> Email </h4>
-                {{ user.email }} <br>
-              </p>
-              <p>
-                <h4> Phone </h4>
-                {{ user.phone }} <br>
-              </p>
-              <p>
-                <h4> Address </h4>
-                {{ user.address }} <br>
-              </p>
-
-              <p><a class="btn btn-primary btn-lg" href="{{ url_for('edit_user_info', username=current_user.username) }}" role="button" style='font-size: 20px'>Edit User Info</a></p>
-          </div>
-
-          <div>
-              <p>
-                <h4> Store </h4>
-                {{ user.store }} <br>
-              </p>
-              <p>
-                <h4> Dropoff Day of Week </h4>
-                {{ user.dropoff_day }} <br>
-              </p>
-              <p>
-                <div>
-                  <h4>Dropoff Notes</h4>
-                    <div style="overflow:scroll">
-                      {{ user.dropoff_notes }}
-                    </div>
-                </div>
-              </p>
-              <p>
-                <div>
-                  <h4>Payment Notes</h4>
-                    <div style="overflow:scroll">
-                      {{ user.payment_notes }}
-                    </div>
-                </div>
-              </p>
-          <p><a class="btn btn-primary btn-lg" href="{{ url_for('edit_delivery_preferences', username=current_user.username) }}" role="button" style='font-size: 20px'>Edit Delivery Preferences</a></p>
-          <p><a href='{{ url_for('edit_login', username=current_user.username) }}' style='font-size: 15px'>Change password</a></p>
-        </div>
-
-      </div>
-
-      </div>
-    </div>
-  {% endif %}
 {% endblock %}

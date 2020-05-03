@@ -14,9 +14,17 @@ Drop off Location:
 
 {{ transaction.recipient.address }}
 
+Additional Address Info:
+
+{{ transaction.recipient.address_notes }}
+
+Payment Type:
+
+{{ transaction.payment_type }}
+
 Payment Notes:
 
-{{ transaction.recipient.payment_notes }}
+{{ transaction.payment_notes }}
 
 Other Notes:
 
