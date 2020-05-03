@@ -27,8 +27,10 @@ def send_recipient_email():
         for transaction in transactions:
             vol = transaction.volunteer
             print(vol.email)
-            # send_confirmation(vol,
-            # 'volunteer_reminder', transaction)
+            if vol.email == 'alexandria.t.wood.tu20@tuck.dartmouth.edu':
+
+                send_confirmation(vol,
+                                  'volunteer_reminder', transaction)
 
 
 sched.start()
