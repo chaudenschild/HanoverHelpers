@@ -10,7 +10,7 @@ sched = BlockingScheduler()
 
 
 # Cron job that sends volunteers their delivery details at specified time (Friday morning 6am)
-@sched.scheduled_job('cron', **app.config['VOLUNTEER_EMAIL_SEND_TIME'])
+@sched.scheduled_job('cron', day_of_week='sun', hour=0, minute=20)
 def send_recipient_email():
 
     # Transactions this week must have dates earlier than next Thursday 6PM.
