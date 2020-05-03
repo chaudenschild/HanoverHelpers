@@ -4,14 +4,16 @@
 
   <p><h4>Recipient</h4></p>
 
-  <b>{{ transaction.recipient_name() }}</b>
+  <b>{{ transaction.recipient.name }}</b>
 
-  <p><h4>Payment Notes</h4></p>
-  {% if recipient.print_payment_notes()  %}
+  <p><h4>Recipient Address</h4></p>
     <p>
-    {% for elem in recipient.print_payment_notes() %}
-      <li>{{ elem }}</li>
-    {% endfor %}
+    {{ transaction.recipient.address }}
+    </p>
+
+  {% if transaction.recipient.address_notes  %}
+    <p>
+    {{ transaction.recipient.address_notes }}
     </p>
   {% endif %}
 

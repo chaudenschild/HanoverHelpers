@@ -229,10 +229,7 @@ class Recipient(BaseUser, db.Model):
     email = db.Column(db.String)
     phone = db.Column(db.String)
     address = db.Column(db.String)
-    store = db.Column(db.String)
-    dropoff_day = db.Column(db.String)
-    dropoff_notes = db.Column(db.String)
-    payment_notes = db.Column(db.String)
+    address_notes = db.Column(db.String)
     password_hash = db.Column(db.String(128))
 
     transactions = db.relationship('Transaction', back_populates='recipient')
@@ -242,9 +239,6 @@ class Recipient(BaseUser, db.Model):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.user_type = 'recipient'
-
-    def print_payment_notes(self):
-        return self.payment_notes.split('/n') if self.payment_notes else ''
 
     def __repr__(self):
         return f"<Recipient(name='{self.name}', username='{self.username}')>"
@@ -285,6 +279,8 @@ class Transaction(db.Model):
     booking_date = db.Column(db.Date, index=True)
     date = db.Column(db.Date, index=True)
     list = db.Column(db.String)
+    payment_type = db.Column(db.String)
+    payment_notes = db.Column(db.String)
     notes = db.Column(db.String)
     claimed = db.Column(db.Boolean, default=False)
     completed = db.Column(db.Boolean, default=False)
@@ -321,9 +317,6 @@ class Transaction(db.Model):
 
     def print_list(self):
         return self.list.split('\n') if self.list else ''
-
-    def recipient_name(self):
-        return self.recipient.name
 
     def __repr__(self):
         return f"Transaction(recipient={self.recipient}, volunteer={self.volunteer})"

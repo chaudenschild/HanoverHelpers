@@ -68,8 +68,9 @@ class RecipientRegistrationForm(RegistrationForm):
         'Confirm Password', validators=[DataRequired(), EqualTo('password')])
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone number', validators=[DataRequired()])
-    address = SelectField('Address (if Other, please provide address in Delivery Notes)', choices=[
+    address = SelectField('Address (if Other, please specify below)', choices=[
         (x, x) for x in ['Kendal', 'Other']], validators=[DataRequired()])
+    address_notes = StringField('Address, if Other')
     submit = SubmitField('Register')
 
 
@@ -108,37 +109,21 @@ class RecipientInfoForm(InfoForm):
     address = SelectField('Address (if Other, please provide address in Delivery Notes)', choices=[
         (x, x) for x in ['Kendal', 'Other']],
         validators=[DataRequired()])
-    submit = SubmitField('Save Preferences')
-
-
-class DeliveryPreferencesForm(FlaskForm):
-
-    delivery_days = ['Friday', 'Saturday']
-
-    store_list = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
-                  'CVS', "BJ's", 'NH Liquor Outlet']
-
-    store = SelectField('Store', choices=[
-        (x, x) for x in store_list], validators=[DataRequired()])
-
-    dropoff_day = SelectField('Preferred Delivery Day', choices=[
-                              (x, x) for x in delivery_days])
-    dropoff_notes = TextAreaField('Standard Delivery Notes')
-    payment_notes = TextAreaField('Standard Payment Notes')
+    address_notes = StringField('Address Notes')
     submit = SubmitField('Save Preferences')
 
 
 class TransactionForm(FlaskForm):
 
-    store_list = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
-                  'CVS', "BJ's", 'NH Liquor Outlet']
-
     store = SelectField('Store', choices=[
-        (x, x) for x in store_list], validators=[DataRequired()])
+        (x, x) for x in app.config['STORE_LIST']], validators=[DataRequired()])
     date = DateField('Date (Either Friday or Saturday)',
                      validators=[DataRequired()])
+    payment_type = SelectField('Payment Type', validators=[DataRequired()], choices=[
+                               (x, x) for x in app.config['PAYMENT_TYPE']])
+    payment_notes = TextAreaField('Payment Notes')
     grocery_list = TextAreaField('Grocery List', validators=[DataRequired()])
-    dropoff_notes = TextAreaField('Delivery Notes')
+    other_notes = TextAreaField('Other Notes')
     submit = SubmitField('Book Delivery')
 
     def __init__(self, username=None, **kwargs):
