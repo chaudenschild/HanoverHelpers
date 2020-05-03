@@ -7,8 +7,8 @@ from flask_login import current_user, login_required, login_user, logout_user
 
 from app import app, basic_auth, db
 from app.emails import send_confirmation, send_password_reset
-from app.forms import (DeliveryPreferencesForm, EditLoginForm, InvoiceForm,
-                       LoginForm, RecipientInfoForm, RecipientRegistrationForm,
+from app.forms import (EditLoginForm, InvoiceForm, LoginForm,
+                       RecipientInfoForm, RecipientRegistrationForm,
                        ResetPasswordEmailForm, ResetPasswordForm,
                        TransactionForm, UserTypeForm, VolunteerInfoForm,
                        VolunteerRegistrationForm)
