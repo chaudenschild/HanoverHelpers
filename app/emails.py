@@ -43,7 +43,7 @@ def send_confirmation(user, confirmation_type, transaction):
     elif confirmation_type == 'volunteer_reminder':
         template = 'volunteer_reminder'
         #subject = f'Delivery reminder for {transaction.recipient.name}, {date_str}'
-        subject = 'If you see this, Christian is not dumb'
+        subject = 'Christian breaking stuff'
     send_email(subject,
                sender=app.config['ADMINS'][0],
                recipients=[user.email],
