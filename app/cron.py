@@ -10,9 +10,9 @@ sched = BlockingScheduler()
 
 
 # Cron job that sends volunteers their delivery details at specified time (Friday morning 6am)
-@sched.scheduled_job('cron', day_of_week='sun', hour=0, minute=20)
+@sched.scheduled_job('cron', **app.config['VOLUNTEER_EMAIL_SEND_TIME'])
 def send_recipient_email():
-
+    print('email triggered')
     # Transactions this week must have dates earlier than next Thursday 6PM.
     d = dt.datetime.today()
     while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
@@ -22,7 +22,7 @@ def send_recipient_email():
 
     transactions = Transaction.query.filter(
         Transaction.date >= dt.datetime.today()).filter(Transaction.date < next_week_cutoff).filter(Transaction.claimed == True).all()
-
+    print(f'length transactions = {len(transactions)}')
     for transaction in transactions:
         print(transaction.volunteer)
         with app.app_context():
