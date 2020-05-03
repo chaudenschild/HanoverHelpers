@@ -21,7 +21,7 @@ def send_recipient_email():
                                    app.config['CUTOFF_DAYTIME']['Hour'])
 
     transactions = Transaction.query.filter(
-        Transaction.date >= dt.datetime.today()).filter(Transaction.date < next_week_cutoff).filter(Transaction.claimed == True).all()
+        Transaction.date >= dt.datetime.today() - dt.timedelta(2)).filter(Transaction.date < next_week_cutoff).filter(Transaction.claimed == True).all()
     print(f'length transactions = {len(transactions)}')
     for transaction in transactions:
         print(transaction.volunteer)
