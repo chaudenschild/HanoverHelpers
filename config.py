@@ -32,3 +32,8 @@ class Config():
 (venv) $ export MAIL_USERNAME=<your-gmail-username> + the @gmail.com
 (venv) $ export MAIL_PASSWORD=<your-gmail-password>
 '''
+
+# postgres commands to pipe from heroku directly to local db
+'''
+heroku run 'pg_dump -xO $DATABASE_URL' | psql hanover_helpers
+'''
