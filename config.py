@@ -7,7 +7,7 @@ class Config():
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hanover-helpers-admin'
 
     SQLALCHEMY_DATABASE_URI = os.environ.get(
-        'DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db'5
+        'DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db'
     SQLALCHEMY_TRACK_MODIFICATIONS=False
 
     BASIC_AUTH_USERNAME='milo'
