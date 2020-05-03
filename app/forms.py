@@ -54,7 +54,7 @@ class EditLoginForm(FlaskForm):
 class RegistrationForm(FlaskForm):
     def validate_username(self, username):
 
-        user = UserDirectory.query.filter_by(username=username).first()
+        user = UserDirectory.query.filter_by(username=username.data).first()
 
         if user is not None:  # check uniqueness in both user types
             raise ValidationError('Username already in use.')

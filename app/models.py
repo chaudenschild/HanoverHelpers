@@ -5,6 +5,7 @@ import jwt
 import pandas as pd
 from flask import url_for
 from flask_login import UserMixin
+from sqlalchemy import desc
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import app, db, login
@@ -106,8 +107,8 @@ def transaction_signup_view(completed=None, claimed=None):
 
 class UserDirectory(db.Model):
     __tablename__ = 'userdirectory'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64))
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    username = db.Column(db.String(64), unique=True)
     user_type = db.Column(db.String())
 
     def __repr__(self):
@@ -176,16 +177,15 @@ class BaseUser(UserMixin):
 
     def get_transactions(self, completed, html=True):
 
-        User, user_type = self.user_table(), self.user_type
-        Counterpart = Volunteer if user_type == 'recipient' else Recipient
-        counterpart_type = 'volunteer' if user_type == 'recipient' else 'recipient'
+        User = self.user_table()
+        Counterpart = Volunteer if self.user_type == 'recipient' else Recipient
+        counterpart_type = 'volunteer' if self.user_type == 'recipient' else 'recipient'
 
         query_list = [User.username,
                       Transaction.id,
                       Transaction.booking_date,
                       Transaction.date,
                       Transaction.store,
-                      Transaction.notes,
                       Counterpart.name,
                       Counterpart.phone]
 
@@ -193,10 +193,11 @@ class BaseUser(UserMixin):
             query_list += [Transaction.invoice]
 
         query = db.session.query(*query_list)\
-                          .join(Transaction, User.id == getattr(Transaction, f'{user_type}_id'))\
+                          .join(Transaction, User.id == getattr(Transaction, f'{self.user_type}_id'))\
                           .outerjoin(Counterpart, getattr(Transaction, f'{counterpart_type}_id') == Counterpart.id) \
             .filter(User.username == self.username) \
-            .filter(Transaction.completed == completed)
+            .filter(Transaction.completed == completed) \
+            .order_by(desc(Transaction.date))
 
         table = Table(query)
 
@@ -205,13 +206,13 @@ class BaseUser(UserMixin):
 
         table.add_transaction_link_column('view_list', 'View List/Notes')
 
-        if user_type == 'recipient':
+        if self.user_type == 'recipient':
             table.add_transaction_link_column('edit_transaction', 'Edit')
             table.add_transaction_link_column('cancel_transaction', 'Cancel')
             table.add_column_alias('name', 'Volunteer Name')
             table.add_column_alias('phone', 'Volunteer Phone')
 
-        elif user_type == 'volunteer':
+        elif self.user_type == 'volunteer':
             table.add_transaction_link_column('mark_complete', 'Mark Complete')
             table.add_transaction_link_column('drop_transaction', 'Drop')
             table.add_column_alias('name', 'Recipient Name')
@@ -223,8 +224,9 @@ class BaseUser(UserMixin):
 class Recipient(BaseUser, db.Model):
     __tablename__ = 'recipient'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), db.ForeignKey(
-        'userdirectory.username'), unique=True)
+    userdir_id = db.Column(db.Integer, db.ForeignKey(
+        'userdirectory.id'), unique=True)
+    username = db.Column(db.String(64), unique=True)
     name = db.Column(db.String)
     email = db.Column(db.String)
     phone = db.Column(db.String)
@@ -233,8 +235,8 @@ class Recipient(BaseUser, db.Model):
     password_hash = db.Column(db.String(128))
 
     transactions = db.relationship('Transaction', back_populates='recipient')
-    directory_listing = db.relationship(
-        'UserDirectory', uselist=False, cascade='delete')
+    directory_listing = db.relationship('UserDirectory',
+                                        uselist=False, cascade='delete')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -247,8 +249,9 @@ class Recipient(BaseUser, db.Model):
 class Volunteer(BaseUser, db.Model):
     __tablename__ = 'volunteer'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), db.ForeignKey(
-        'userdirectory.username'), unique=True)
+    userdir_id = db.Column(db.Integer, db.ForeignKey(
+        'userdirectory.id'), unique=True)
+    username = db.Column(db.String(64), unique=True)
     name = db.Column(db.String)
     phone = db.Column(db.String)
     email = db.Column(db.String)
@@ -256,8 +259,8 @@ class Volunteer(BaseUser, db.Model):
     admin = db.Column(db.Boolean, default=False)
 
     transactions = db.relationship('Transaction', back_populates='volunteer')
-    directory_listing = db.relationship(
-        'UserDirectory', uselist=False, cascade='delete')
+    directory_listing = db.relationship('UserDirectory',
+                                        uselist=False, cascade='delete')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

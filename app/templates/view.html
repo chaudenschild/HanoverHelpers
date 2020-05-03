@@ -17,10 +17,21 @@
     </p>
   {% endif %}
 
-  <p><h4>Notes</h4></p>
+  {% if transaction.payment_notes  %}
+  <p><h4>Payment Notes</h4></p>
+    <p>
+    {{ transaction.payment_notes }}
+    </p>
+  {% endif %}
+
+
+  {% if transaction.notes  %}
+  <p><h4>Other Notes</h4></p>
     <p>
     {{ transaction.notes }}
     </p>
+  {% endif %}
+
 
   <p><h4>List</h4></p>
   <p>

@@ -4,6 +4,7 @@ import datetime as dt
 import pandas as pd
 from flask import flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
+from sqlalchemy import desc
 
 from app import app, basic_auth, db
 from app.emails import send_confirmation, send_password_reset
@@ -239,15 +240,14 @@ def book():
         # default to next Friday
         while d.weekday() != 4:
             d += dt.timedelta(1)
-
-        # fetch most recent store, most recent payment type, most recent payment notes
-        most_recent_trans = Transaction.query.filter_by(
-            username=current_user.username).order_by(desc(Transaction.date)).first()
-
-        form.store.data = most_recent_trans.store
         form.date.data = d
-        form.payment_type = most_recent_trans.payment_type
-        form.payment_notes = most_recent_trans.notes
+        # fetch most recent store, most recent payment type, most recent payment notes
+        most_recent_trans = db.session.query(Transaction).join(Recipient).filter(
+            Recipient.username == current_user.username).order_by(desc(Transaction.date)).first()
+        if most_recent_trans is not None:
+            form.store.data = most_recent_trans.store
+            form.payment_type.data = most_recent_trans.payment_type
+            form.payment_notes.data = most_recent_trans.payment_notes
 
     return render_template('standard_form.html', header='Book Delivery', form=form)
 
