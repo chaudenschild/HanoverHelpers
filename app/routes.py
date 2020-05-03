@@ -289,8 +289,8 @@ def edit_transaction(transaction_id):
 
         transaction.store = form.store.data
         transaction.date = form.date.data
-        transaction.payment_type = form.date.payment_type
-        transaction.payment_notes = form.date.payment_notes
+        transaction.payment_type = form.payment_type.data
+        transaction.payment_notes = form.payment_notes.data
         transaction.list = form.grocery_list.data
         transaction.notes = form.other_notes.data
         transaction.booking_date = dt.datetime.today()
