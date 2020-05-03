@@ -6,7 +6,13 @@
   <div class='flex-container'>
     <div class='row'>
       <div class='col-lg-12'>
+        
+        {% if user.user_type == 'volunteer' %}
         <a class="btn btn-primary btn-lg" href="{{ url_for('delivery_signup') }}" role="button" style='font-size:20px'>Delivery Signup</a>
+        {% elif user.user_type == 'recipient' %}
+        <a class="btn btn-primary btn-lg" href="{{ url_for('book') }}" role="button" style='font-size:20px'>Book Delivery</a>
+        {% endif %}
+
         <div style='margin-bottom:55px; margin-top:55px'>
           <h3> Upcoming Deliveries </h3>
           <br>
