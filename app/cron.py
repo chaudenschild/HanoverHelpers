@@ -23,11 +23,12 @@ def send_recipient_email():
     transactions = Transaction.query.filter(
         Transaction.date >= dt.datetime.today().date() - dt.timedelta(2)).filter(Transaction.date < next_week_cutoff).filter(Transaction.claimed == True).all()
     print(f'length transactions = {len(transactions)}')
-    for transaction in transactions:
-        vol = transaction.volunteer
-        with app.app_context():
-            send_confirmation(vol,
-                              'volunteer_reminder', transaction)
+    with app.app_context():
+        for transaction in transactions:
+            vol = transaction.volunteer
+            print(vol.email)
+            # send_confirmation(vol,
+            # 'volunteer_reminder', transaction)
 
 
 sched.start()
