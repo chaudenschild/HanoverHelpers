@@ -22,7 +22,7 @@ class Config():
     CUTOFF_DAYTIME = {'Day': 3, 'Hour': 18}  # Thursday 6PM
     # Should be friday 6am; different for debugging
     VOLUNTEER_EMAIL_SEND_TIME = {
-        'day_of_week': 'sun', 'hour': 0, 'minute': 42}
+        'day_of_week': 'sun', 'hour': 0, 'minute': 46}
 
 
 # Set environment vars for local testing

@@ -24,9 +24,9 @@ def send_recipient_email():
         Transaction.date >= dt.datetime.today().date() - dt.timedelta(2)).filter(Transaction.date < next_week_cutoff).filter(Transaction.claimed == True).all()
     print(f'length transactions = {len(transactions)}')
     for transaction in transactions:
-        print(transaction.volunteer)
+        vol = transaction.volunteer
         with app.app_context():
-            send_confirmation(transaction.volunteer,
+            send_confirmation(vol,
                               'volunteer_reminder', transaction)
 
 
