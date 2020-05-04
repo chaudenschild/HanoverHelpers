@@ -191,6 +191,12 @@ def deliveries(username):
 
     return render_template('user/deliveries.html', user=current_user)
 
+@app.route('/user/<username>/completed_deliveries')
+@login_required
+def completed_deliveries(username):
+
+    return render_template('user/completed_deliveries.html', user=current_user)
+
 
 @app.route('/user/<username>/edit_login', methods=["GET", "POST"])
 @login_required

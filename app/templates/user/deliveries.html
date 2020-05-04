@@ -2,7 +2,7 @@
 
 {% block app_content %}
 
-  <div class='row' style='margin-bottom:30px'><h2>Deliveries: {{ user.username }}</h2></div>
+  <div class='row' style='margin-bottom:30px'><h2>Deliveries: {{ user.name }}</h2></div>
   <div class='flex-container'>
     <div class='row'>
       <div class='col-lg-12'>
@@ -18,11 +18,7 @@
           <br>
           {{ user.get_transactions(completed=False) | safe }}
         </div>
-        <div style='margin-bottom:40px'>
-          <h3> Completed Deliveries </h3>
-          <br>
-          {{ user.get_transactions(completed=True) | safe }}
-        </div>
+        <p><a href='{{ url_for('completed_deliveries', username=current_user.username) }}' style='font-size: 15px'>View Completed Deliveries</a></p>
       </div>
     </div>
   </div>

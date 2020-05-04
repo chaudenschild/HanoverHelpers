@@ -7,3 +7,4 @@ hanover-helpers-venv
 app.db
 venv/
 generate_fake_db.py
+.coverage

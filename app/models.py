@@ -53,10 +53,10 @@ class Table():
     def add_formatter(self, k, v):
         self.formatters[k] = v
 
-    def add_transaction_link_column(self, route, label):
+    def add_transaction_link_column(self, route, label, confirm=False):
         self.df[label] = self.df['id']
         self.formatters[label] = lambda x: Table._link(
-            url_for(route, transaction_id=int(x)), label)
+            url_for(route, transaction_id=int(x)), label, confirm=confirm)
 
     def return_as_completed(self):
         # no hyperlinks, no id column
@@ -70,8 +70,11 @@ class Table():
         return '<div style="overflow:scroll; height:75px;">' + x + '</div>'
 
     @classmethod
-    def _link(cls, href, label):
-        return '<a href="' + href + '">' + label + '</a>'
+    def _link(cls, href, label, confirm):
+        if confirm:
+            return '<a href="' + href + '" class="confirmation">' + label + '</a>'
+        else:
+            return '<a href="' + href + '">' + label + '</a>'
 
     def make_html(self, drop_cols=['username']):
         self.df = self.df.drop(columns=['id'])
@@ -208,13 +211,13 @@ class BaseUser(UserMixin):
 
         if self.user_type == 'recipient':
             table.add_transaction_link_column('edit_transaction', 'Edit')
-            table.add_transaction_link_column('cancel_transaction', 'Cancel')
+            table.add_transaction_link_column('cancel_transaction', 'Cancel', confirm=True)
             table.add_column_alias('name', 'Volunteer Name')
             table.add_column_alias('phone', 'Volunteer Phone')
 
         elif self.user_type == 'volunteer':
-            table.add_transaction_link_column('mark_complete', 'Mark Complete')
-            table.add_transaction_link_column('drop_transaction', 'Drop')
+            table.add_transaction_link_column('mark_complete', 'Mark Complete', confirm=True)
+            table.add_transaction_link_column('drop_transaction', 'Drop', confirm=True)
             table.add_column_alias('name', 'Recipient Name')
             table.add_column_alias('phone', 'Recipient Phone')
 

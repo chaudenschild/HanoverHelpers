@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+  <div style='margin-bottom:40px'>
+    <h3> Completed Deliveries </h3>
+    <br>
+    {{ user.get_transactions(completed=True) | safe }}
+  </div>
+{% endblock %}
