@@ -1,10 +1,13 @@
 import calendar
 import datetime as dt
+import os
 
 import pandas as pd
-from flask import flash, redirect, render_template, request, session, url_for
+from flask import (flash, redirect, render_template, request,
+                   send_from_directory, session, url_for)
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import desc
+from werkzeug.utils import secure_filename
 
 from app import app, basic_auth, db
 from app.emails import send_confirmation, send_password_reset
@@ -384,4 +387,52 @@ def mark_complete(transaction_id):
 
         return redirect(url_for('deliveries', username=current_user.username))
 
-    return render_template('invoice_form.html', header='Invoice', form=form)
+    elif request.method == 'GET':
+        form.invoice.data = transaction.invoice
+
+    return render_template('invoice_form.html', header='Invoice', form=form, transaction=transaction)
+
+
+@app.route('/upload_file/<transaction_id>', methods=['GET', 'POST'])
+@login_required
+def upload_file(transaction_id):
+    allowed_exts = ['png', 'jpg', 'jpeg']
+
+    def allowed_file(filename):
+        return '.' in filename and \
+            filename.rsplit('.', 1)[1].lower() in allowed_exts
+
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file attached')
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if not allowed_file(file.filename):
+            flash(f'Filetype must be of {allowed_files}')
+            return redirect(request.url)
+        if file:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(
+                app.config['IMAGE_UPLOAD_FOLDER'], filename))
+            transaction = Transaction.query.filter_by(
+                id=transaction_id).first()
+            transaction.image_fname = filename
+            transaction.image_url = url_for('uploaded_file',
+                                            filename=filename)
+            db.session.add(transaction)
+            db.session.commit()
+            flash('Image added!')
+            return redirect(url_for('mark_complete',
+                                    transaction_id=transaction_id))
+    return render_template('upload_file_form.html')
+
+
+@app.route('/uploads/<filename>')
+@login_required
+def uploaded_file(filename):
+    breakpoint()
+    return send_from_directory(os.path.join('.', app.config['IMAGE_UPLOAD_FOLDER']),
+                               filename)

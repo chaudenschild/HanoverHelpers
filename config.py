@@ -29,15 +29,21 @@ class Config():
                   'CVS', "BJ's", 'NH Liquor Outlet']
     PAYMENT_TYPE = ['Check', 'Paypal',
                     'Coop Charge Account (Specify Account # in Payment Notes)', 'Other (Specify in Payment Notes)']
+    IMAGE_UPLOAD_FOLDER = os.path.join(basedir, 'static/receipt_images')
 
 
-# Set environment vars for local testing
+# Set environment vars for email local testing
 '''
 (venv) $ export MAIL_SERVER=smtp.googlemail.com
 (venv) $ export MAIL_PORT=587
 (venv) $ export MAIL_USE_TLS=1
 (venv) $ export MAIL_USERNAME=<your-gmail-username> + the @gmail.com
 (venv) $ export MAIL_PASSWORD=<your-gmail-password>
+'''
+
+# Local postgres
+'''
+export DATASE_URL='postgresql:///hanover_helpers'
 '''
 
 # postgres commands to pipe from heroku directly to local db

@@ -3,5 +3,13 @@
 {% block optional %}
 
 <p><h6><i>As a reminder, please venmo request @nataliet to get reimbursed</i></h6></p>
+<br>
+<a href="{{ url_for('upload_file', transaction_id=transaction.id) }}" style="font-size:20px">Optional Receipt Upload</a></div>
+<br>
+
+{% if transaction.image_fname %}
+<img src="{{ url_for('static', filename='receipt_images/{transaction.image_fname}') }}" width="120" height="90" />
+{% endif %}
+
 
 {% endblock %}
