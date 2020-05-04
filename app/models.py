@@ -111,7 +111,7 @@ def transaction_signup_view(completed=None, claimed=None):
 class UserDirectory(db.Model):
     __tablename__ = 'userdirectory'
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    username = db.Column(db.String(64), unique=True)
+    username = db.Column(db.String(64), unique=True, nullable=False)
     user_type = db.Column(db.String())
 
     def __repr__(self):
