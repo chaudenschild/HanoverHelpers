@@ -1,6 +1,6 @@
 <p>Dear {{ transaction.volunteer.name }},</p>
 
-<p>Thank you for volunteering to deliver groceries/essential items to {{ transaction.recipient.name }} today, {{ date }}! Please see below for details related to your delivery.</p>
+<p>Thank you for volunteering to deliver groceries/essential items to {{ transaction.recipient.name }} on {{ date }}! Please see below for details related to your delivery.</p>
 
 <p><h4>Recipient Name:</h4></p>
 
@@ -14,9 +14,11 @@
 
 {{ transaction.recipient.address }}
 
-<p><h4>Additional Address Info:</h4></p>
+{% if transaction.recipient.address_notes %}
+  <p><h4>Additional Address Info:</h4></p>
 
-{{ transaction.recipient.address_notes }}
+  {{ transaction.recipient.address_notes }}
+{% endif %}
 
 <p><h4>Payment Type:</h4></p>
 
@@ -26,9 +28,11 @@
 
 {{ transaction.payment_notes }}
 
-<p><h4>Other Notes:</h4></p>
+{% if transaction.notes  %}
+  <p><h4>Other Notes:</h4></p>
 
-{{ transaction.notes }}
+  {{ transaction.notes }}
+{% endif %}
 
 <p><h4>Store:</h4></p>
 

@@ -344,7 +344,7 @@ def drop_transaction(transaction_id):
     db.session.commit()
     flash('Delivery dropped')
 
-    return redirect(url_for('deliveries', current_user))
+    return redirect(url_for('deliveries', username=current_user.username))
 
 
 @app.route('/cancel/<transaction_id>', methods=['GET', 'POST'])
@@ -366,6 +366,17 @@ def cancel_transaction(transaction_id):
         db.session.delete(transaction)
         db.session.commit()
         flash('Delivery canceled')
+
+    return redirect(url_for('deliveries', username=current_user.username))
+
+
+@app.route('/send_volunteer_email/<transaction_id>', methods=['GET', 'POST'])
+@login_required
+def send_volunteer_email(transaction_id):
+    transaction = Transaction.query.filter_by(id=transaction_id).first()
+    send_confirmation(transaction.volunteer,
+                      'volunteer_reminder', transaction)
+    flash(f'Grocery list emailed to {transaction.volunteer.email}')
 
     return redirect(url_for('deliveries', username=current_user.username))
 

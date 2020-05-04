@@ -122,7 +122,7 @@ class TransactionForm(FlaskForm):
     payment_type = SelectField('Payment Type', validators=[DataRequired()], choices=[
                                (x, x) for x in app.config['PAYMENT_TYPE']])
     payment_notes = TextAreaField('Payment Notes')
-    grocery_list = TextAreaField('Grocery List', validators=[DataRequired()])
+    grocery_list = TextAreaField('Shopping List', validators=[DataRequired()])
     other_notes = TextAreaField('Other Notes')
     submit = SubmitField('Book Delivery')
 

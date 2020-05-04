@@ -211,13 +211,18 @@ class BaseUser(UserMixin):
 
         if self.user_type == 'recipient':
             table.add_transaction_link_column('edit_transaction', 'Edit')
-            table.add_transaction_link_column('cancel_transaction', 'Cancel', confirm=True)
+            table.add_transaction_link_column(
+                'cancel_transaction', 'Cancel', confirm=True)
             table.add_column_alias('name', 'Volunteer Name')
             table.add_column_alias('phone', 'Volunteer Phone')
 
         elif self.user_type == 'volunteer':
-            table.add_transaction_link_column('mark_complete', 'Mark Complete', confirm=True)
-            table.add_transaction_link_column('drop_transaction', 'Drop', confirm=True)
+            table.add_transaction_link_column(
+                'send_volunteer_email', 'Email List')
+            table.add_transaction_link_column(
+                'mark_complete', 'Mark Complete', confirm=True)
+            table.add_transaction_link_column(
+                'drop_transaction', 'Drop', confirm=True)
             table.add_column_alias('name', 'Recipient Name')
             table.add_column_alias('phone', 'Recipient Phone')
 
