@@ -37,9 +37,11 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        userdir_id = UserDirectory.query.filter_by(
-            username=form.username.data).first().id
-        user = get_user_by_userdir_id(userdir_id)
+        userdir = UserDirectory.query.filter_by(
+            username=form.username.data).first()
+
+        user = get_user_by_userdir_id(
+            userdir.id) if userdir is not None else None
 
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
@@ -190,6 +192,7 @@ def user(username):
 def deliveries(username):
 
     return render_template('user/deliveries.html', user=current_user)
+
 
 @app.route('/user/<username>/completed_deliveries')
 @login_required
@@ -381,4 +384,4 @@ def mark_complete(transaction_id):
 
         return redirect(url_for('deliveries', username=current_user.username))
 
-    return render_template('standard_form.html', header='Invoice', form=form)
+    return render_template('invoice_form.html', header='Invoice', form=form)
