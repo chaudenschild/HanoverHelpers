@@ -12,16 +12,16 @@ from app import app, db, login
 
 
 @login.user_loader
-def load_user(username):
-    user = get_user(username)
+def load_user(userdir_id):
+    user = get_user_by_userdir_id(userdir_id)
     if user is None:
         return
     return user
 
 
-def get_user(username):
+def get_user_by_userdir_id(userdir_id):
     userdir = db.session.query(UserDirectory).filter_by(
-        username=username).first()
+        id=userdir_id).first()
     if userdir is None:
         return
     if userdir.user_type == 'volunteer':
@@ -29,7 +29,7 @@ def get_user(username):
     elif userdir.user_type == 'recipient':
         User = Recipient
 
-    return User.query.filter_by(username=username).first()
+    return User.query.filter_by(userdir_id=userdir_id).first()
 
 
 class Table():
@@ -124,7 +124,7 @@ class BaseUser(UserMixin):
     @user_type.setter
     def user_type(self, type):
         dir_listing = db.session.query(
-            UserDirectory).filter_by(username=self.username).first()
+            UserDirectory).filter_by(id=self.userdir_id).first()
         if dir_listing is None:
             new_listing = UserDirectory(username=self.username, user_type=type)
             self.directory_listing = new_listing
@@ -173,7 +173,7 @@ class BaseUser(UserMixin):
         return User.query.get(id)
 
     def get_id(self):
-        return self.username
+        return self.userdir_id
 
     def get_transactions(self, completed, html=True):
 

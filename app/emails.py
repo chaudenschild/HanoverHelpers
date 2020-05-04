@@ -37,6 +37,9 @@ def send_confirmation(user, confirmation_type, transaction):
     if confirmation_type == 'recipient_booking':
         template = 'recipient_booking_confirmation'
         subject = f'Delivery confirmed for {date_str}'
+    elif confirmation_type == 'recipient_modification':
+        template = 'recipient_modification_confirmation'
+        subject = f'Modification confirmed for {date_str} delivery'
     elif confirmation_type == 'volunteer_claimed':
         template = 'volunteer_claimed_confirmation'
         subject = f'Delivery claimed for {date_str}'

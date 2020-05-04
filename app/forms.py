@@ -68,9 +68,9 @@ class RecipientRegistrationForm(RegistrationForm):
         'Confirm Password', validators=[DataRequired(), EqualTo('password')])
     email = StringField('Email', validators=[DataRequired(), Email()])
     phone = StringField('Phone number', validators=[DataRequired()])
-    address = SelectField('Address (if Other, please specify below)', choices=[
+    address = SelectField('Address (if Other, please specify in Address Notes)', choices=[
         (x, x) for x in ['Kendal', 'Other']], validators=[DataRequired()])
-    address_notes = StringField('Address, if Other')
+    address_notes = StringField('Address Notes')
     submit = SubmitField('Register')
 
 

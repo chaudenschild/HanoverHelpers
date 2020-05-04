@@ -13,7 +13,8 @@ from app.forms import (EditLoginForm, InvoiceForm, LoginForm,
                        ResetPasswordEmailForm, ResetPasswordForm,
                        TransactionForm, UserTypeForm, VolunteerInfoForm,
                        VolunteerRegistrationForm)
-from app.models import (BaseUser, Recipient, Transaction, Volunteer, get_user,
+from app.models import (BaseUser, Recipient, Transaction, UserDirectory,
+                        Volunteer, get_user_by_userdir_id,
                         transaction_signup_view)
 
 
@@ -36,14 +37,16 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        user = get_user(form.username.data)
+        userdir_id = UserDirectory.query.filter_by(
+            username=form.username.data).first().id
+        user = get_user_by_userdir_id(userdir_id)
 
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
 
         login_user(user, remember=form.remember_me.data)
-        return redirect(url_for('user', username=user.username))
+        return redirect(url_for('deliveries', username=current_user.username))
 
     return render_template('login_form.html', header='Sign In', form=form)
 
@@ -179,15 +182,14 @@ def edit_user_info(username):
 @login_required
 def user(username):
 
-    return render_template('user/profile.html', user=current_user,
-                           usertype=current_user.user_type)
+    return render_template('user/profile.html', user=current_user)
 
 
 @app.route('/user/<username>/deliveries')
 @login_required
 def deliveries(username):
 
-    return render_template('user/deliveries.html', user=current_user, usertype=current_user.user_type)
+    return render_template('user/deliveries.html', user=current_user)
 
 
 @app.route('/user/<username>/edit_login', methods=["GET", "POST"])
@@ -333,7 +335,7 @@ def drop_transaction(transaction_id):
     db.session.commit()
     flash('Delivery dropped')
 
-    return redirect(url_for('deliveries', username=current_user.username))
+    return redirect(url_for('deliveries', current_user))
 
 
 @app.route('/cancel/<transaction_id>', methods=['GET', 'POST'])
