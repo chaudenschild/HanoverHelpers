@@ -1,5 +1,7 @@
 import os
 
+from flask import url_for
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -22,14 +24,14 @@ class Config():
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['hanoverhelpers@gmail.com']
     CUTOFF_DAYTIME = {'Day': 3, 'Hour': 18}  # Thursday 6PM
-    # Should be friday 6am; different for debugging
+    # Default Friday 6am
     VOLUNTEER_EMAIL_SEND_TIME = {
         'day_of_week': 'fri', 'hour': 6, 'minute': 0}
     STORE_LIST = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
                   'CVS', "BJ's", 'NH Liquor Outlet']
     PAYMENT_TYPE = ['Check', 'Paypal',
                     'Coop Charge Account (Specify Account # in Payment Notes)', 'Other (Specify in Payment Notes)']
-    IMAGE_UPLOAD_FOLDER = os.path.join(basedir, 'static/receipt_images')
+    IMAGE_UPLOAD_FOLDER = 'receipt_images'  # must be within static folder
 
 
 # Set environment vars for email local testing
@@ -43,7 +45,7 @@ class Config():
 
 # Local postgres
 '''
-export DATASE_URL='postgresql:///hanover_helpers'
+export DATABASE_URL='postgresql:///hanover_helpers'
 '''
 
 # postgres commands to pipe from heroku directly to local db

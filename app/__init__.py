@@ -11,7 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 from app.admin_utils import RecipientView, TransactionView, VolunteerView
 from config import Config
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.config.from_object(Config)
 
 db = SQLAlchemy(app)

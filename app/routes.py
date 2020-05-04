@@ -414,11 +414,18 @@ def upload_file(transaction_id):
             flash(f'Filetype must be of {allowed_files}')
             return redirect(request.url)
         if file:
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(
-                app.config['IMAGE_UPLOAD_FOLDER'], filename))
+
             transaction = Transaction.query.filter_by(
                 id=transaction_id).first()
+            # check for presence of previous receipt and delete
+            if transaction.image_fname is not None:
+                os.remove(os.path.join(
+                    app.static_folder, app.config['IMAGE_UPLOAD_FOLDER'], transaction.image_fname))
+
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.static_folder,
+                                   app.config['IMAGE_UPLOAD_FOLDER'], filename))
+
             transaction.image_fname = filename
             transaction.image_url = url_for('uploaded_file',
                                             filename=filename)
@@ -430,9 +437,29 @@ def upload_file(transaction_id):
     return render_template('upload_file_form.html')
 
 
+@app.route('/delete_file/<transaction_id>', methods=['GET', 'POST'])
+@login_required
+def delete_file(transaction_id):
+    transaction = Transaction.query.filter_by(
+        id=transaction_id).first()
+
+    os.remove(os.path.join(app.static_folder,
+                           app.config['IMAGE_UPLOAD_FOLDER'],
+                           transaction.image_fname))
+
+    transaction.image_fname = None
+    transaction.image_url = None
+
+    db.session.add(transaction)
+    db.session.commit()
+
+    flash('Image deleted!')
+    return redirect(url_for('mark_complete',
+                            transaction_id=transaction_id))
+
+
 @app.route('/uploads/<filename>')
 @login_required
 def uploaded_file(filename):
-    breakpoint()
-    return send_from_directory(os.path.join('.', app.config['IMAGE_UPLOAD_FOLDER']),
-                               filename)
+    # hacky hardcode
+    return send_from_directory(os.path.join(app.static_folder, app.config['IMAGE_UPLOAD_FOLDER']), filename)
