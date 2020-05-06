@@ -18,6 +18,14 @@ from app.models import (BaseUser, Recipient, Transaction, UserDirectory,
                         transaction_signup_view)
 
 
+@app.before_request
+def before_request():
+    if app.env != 'development':
+        if not request.is_secure or request.url.startswith('http://'):
+            url = request.url.replace('http://', 'https://', 1)
+            return redirect(url, code=301)  # permanent redirect
+
+
 @app.route('/')
 def root():
     return redirect(url_for('login'))
