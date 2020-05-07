@@ -9,3 +9,4 @@ venv/
 generate_fake_db.py
 .coverage
 receipt_images/
+.env

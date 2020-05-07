@@ -27,6 +27,7 @@ class RecipientView(ModelView):
 
 class TransactionView(ModelView):
     column_exclude_list = ['list', 'notes']
+    column_searchable_list = ['name', 'address']
     column_filters = ['store', 'recipient',
                       'volunteer', 'claimed', 'completed', 'paid']
     column_formatters = dict(volunteer=lambda v, c, m, p: m.volunteer.name if m.volunteer is not None else None,

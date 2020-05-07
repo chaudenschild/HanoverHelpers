@@ -4,14 +4,14 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config():
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'hanover-helpers-admin'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
 
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    BASIC_AUTH_USERNAME = 'milo'
-    BASIC_AUTH_PASSWORD = 'numberonehelper'
+    BASIC_AUTH_USERNAME = os.environ.get('BASIC_AUTH_USERNAME')
+    BASIC_AUTH_PASSWORD = os.environ.get('BASIC_AUTH_PASSWORD')
 
     FLASK_ADMIN_SWATCH = 'yeti'
 
