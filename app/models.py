@@ -43,8 +43,8 @@ class Table():
     def __init__(self, query):
         self.query = query
         self.df = pd.read_sql(query.statement, db.session.bind)
-        self.formatters = {'Delivery Date': lambda x: '<b>' + str(x) + '</b>',
-                           'List': Table._add_autoscroll,
+        self.formatters = {'Delivery Date': lambda x: '<b>' +
+                           str(x) + '</b>',
                            'Notes': Table._add_autoscroll}
 
     def add_column_alias(self, k, v):
