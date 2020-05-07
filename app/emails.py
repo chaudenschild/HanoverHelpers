@@ -12,13 +12,17 @@ def send_async_email(app, msg):
 
 
 def send_email(subject, recipients, text_body, html_body, sender=None):
-    if sender is not None:
-        msg = Message(subject, sender=sender, recipients=recipients)
+
+    if os.environ.get('EMAIL') == 'off':  # for debug mode
+        pass
     else:
-        msg = Message(subject, recipients=recipients)
-    msg.body = text_body
-    msg.html = html_body
-    Thread(target=send_async_email, args=(app, msg)).start()
+        if sender is not None:
+            msg = Message(subject, sender=sender, recipients=recipients)
+        else:
+            msg = Message(subject, recipients=recipients)
+        msg.body = text_body
+        msg.html = html_body
+        Thread(target=send_async_email, args=(app, msg)).start()
 
 
 def send_password_reset(user):

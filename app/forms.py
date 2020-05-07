@@ -10,7 +10,7 @@ from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
 from app import app, db
-from app.models import Recipient, Transaction, UserDirectory
+from app.models import Recipient, Transaction, UserDirectory, Volunteer
 
 
 class LoginForm(FlaskForm):
@@ -58,6 +58,14 @@ class RegistrationForm(FlaskForm):
 
         if user is not None:  # check uniqueness in both user types
             raise ValidationError('Username already in use.')
+
+    def validate_email(self, email):
+
+        user_r = Recipient.query.filter_by(email=email.data).first()
+        user_v = Volunteer.query.filter_by(email=email.data).first()
+
+        if user_r is not None or user_v is not None:
+            raise ValidationError('Email already in use')
 
 
 class RecipientRegistrationForm(RegistrationForm):
