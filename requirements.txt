@@ -17,3 +17,4 @@ email_validator
 gunicorn
 psycopg2
 apscheduler
+python-dotenv
