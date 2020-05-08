@@ -1,4 +1,5 @@
 import datetime as dt
+import time
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -24,11 +25,17 @@ def send_recipient_email():
         Transaction.date >= dt.datetime.today().date()).filter(Transaction.date < next_week_cutoff).filter(Transaction.claimed == True).all()
 
     with app.app_context():
+        count = 0
         for transaction in transactions:
+            print(f'{transaction.volunteer.name}, {transaction.recipient.name}')
+            print(f'count = {count}')
+            time.sleep(2)
             try:
                 send_confirmation(transaction.volunteer,
                                   'volunteer_reminder', transaction)
+                count += 1
             except Exception:
+                print('exception raised')
                 continue
 
 
