@@ -29,7 +29,6 @@ def send_email(subject, recipients, text_body, html_body, sender=None):
 def send_password_reset(user):
     token = user.get_reset_password_token()
     send_email('Hanover Helpers Password Reset',
-               sender=app.config['ADMINS'][0],
                recipients=[user.email],
                text_body=render_template('email/reset_password_email.txt',
                                          user=user, token=token),
@@ -52,7 +51,6 @@ def send_confirmation(user, confirmation_type, transaction):
         template = 'volunteer_reminder'
         subject = f'Delivery reminder for {transaction.recipient.name}, {date_str}'
     send_email(subject,
-               sender=app.config['ADMINS'][0],
                recipients=[user.email],
                text_body=render_template(f'email/{template}.txt',
                                          user=user, date=date_str, transaction=transaction),
