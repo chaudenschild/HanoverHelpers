@@ -27,7 +27,7 @@ class Config():
     CUTOFF_DAYTIME = {'Day': 3, 'Hour': 18}  # Thursday 6PM
     # Should be friday 6am; different for debugging
     VOLUNTEER_EMAIL_SEND_TIME = {
-        'day_of_week': 'fri', 'hour': 8, 'minute': 50}
+        'day_of_week': 'fri', 'hour': 9, 'minute': 4}
     STORE_LIST = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
                   'CVS', "BJ's", 'NH Liquor Outlet']
     PAYMENT_TYPE = ['Check', 'Paypal',

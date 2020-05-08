@@ -25,8 +25,11 @@ def send_recipient_email():
 
     with app.app_context():
         for transaction in transactions:
-            send_confirmation(transaction.volunteer,
-                              'volunteer_reminder', transaction)
+            try:
+                send_confirmation(transaction.volunteer,
+                                  'volunteer_reminder', transaction)
+            except Exception:
+                continue
 
 
 sched.start()
