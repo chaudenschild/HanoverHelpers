@@ -2,7 +2,15 @@
 
 {% block head %}
 {{ super() }}
+
  <link rel="shortcut icon" href="{{ url_for('static', filename='h.png' )}}" type="image/png"/>
+
+ <style>
+  .strike {
+    text-decoration: line-through;
+  }
+ </style>
+
 {% endblock %}
 
 {% block title %}
@@ -99,6 +107,12 @@ $(document).ready( function () {
     $('.confirmation').on('click', function () {
         return confirm('Confirm selection.');
     });
+</script>
+
+<script type="text/javascript">
+$(".st").on('click', 'li', function() {
+  $(this).toggleClass('strike');
+});
 </script>
 
 {% endblock %}

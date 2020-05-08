@@ -33,12 +33,10 @@
     </p>
   {% endif %}
 
-
+<div class='st'>
   <p><h4>List</h4></p>
-  <p>
   {% for elem in transaction.print_list() %}
     <li>{{ elem }}</li>
   {% endfor %}
-  </p>
-
+</div>
 {% endblock %}
