@@ -1,3 +1,4 @@
+import datetime as dt
 import unittest
 
 from app import app, db
@@ -57,6 +58,16 @@ class TransactionTest(unittest.TestCase):
         self.assertNotIn(v, Volunteer.query.all())
         all_userdir_ids = [u.id for u in UserDirectory.query.all()]
         self.assertNotIn(v.userdir_id, all_userdir_ids)
+
+
+class DateValidationTest(unittest.TestCase):
+
+    def on_time_trans(self):
+        d = dt.datetime().now()
+        cutoff = dt.datetime(
+            d.year, d.month, app.config['CUTOFF_DAYTIME']['Day'], app.config['CUTOFF_DAYTIME']['Hour'])
+        booking_date = dt.datetime(
+            d.year, d.month, app.config['CUTOFF_DAYTIME']['DAY'], app.config['CUTOFF_DAYTIME']['Hour'] - 1)
 
 
 if __name__ == '__main__':

@@ -317,7 +317,7 @@ def edit_transaction(transaction_id):
         db.session.add(transaction)
         db.session.commit()
 
-        flash(f'Delivery modified!')
+        flash('Delivery modified!')
         send_confirmation(
             current_user, 'recipient_modification', transaction)
 
