@@ -8,7 +8,6 @@ from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-from app.admin_utils import RecipientView, TransactionView, VolunteerView
 from config import Config
 
 app = Flask(__name__)
@@ -23,8 +22,8 @@ admin = Admin(app, name='Hanover Helpers Admin', template_mode='bootstrap3')
 bootstrap = Bootstrap(app)
 mail = Mail(app)
 
-from app import models, routes
+from app import models, routes, admin_utils
 
-admin.add_view(VolunteerView(models.Volunteer, db.session))
-admin.add_view(RecipientView(models.Recipient, db.session))
-admin.add_view(TransactionView(models.Transaction, db.session))
+admin.add_view(admin_utils.VolunteerView(models.Volunteer, db.session))
+admin.add_view(admin_utils.RecipientView(models.Recipient, db.session))
+admin.add_view(admin_utils.TransactionView(models.Transaction, db.session))

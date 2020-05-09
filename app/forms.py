@@ -4,6 +4,7 @@ import pandas as pd
 import phonenumbers
 from flask_login import current_user
 from flask_wtf import FlaskForm
+from sqlalchemy import or_
 from wtforms import (BooleanField, FloatField, PasswordField, RadioField,
                      SelectField, StringField, SubmitField, TextAreaField)
 from wtforms.fields.html5 import DateField
@@ -61,11 +62,22 @@ class RegistrationForm(FlaskForm):
 
     def validate_email(self, email):
 
-        user_r = Recipient.query.filter_by(email=email.data).first()
-        user_v = Volunteer.query.filter_by(email=email.data).first()
+        user_r = Recipient.query.filter(
+            Recipient.email.ilike(email.data)).first()
+        user_v = Volunteer.query.filter(
+            Volunteer.email.ilike(email.data)).first()
 
-        if user_r is not None or user_v is not None:
-            raise ValidationError('Email already in use')
+        if user_r is not None:
+            if user_r.email in app.config['EMAIL_VALIDATOR_EXEMPT']:
+                pass
+            else:
+                raise ValidationError('Email already in use')
+
+        if user_v is not None:
+            if user_v.email in app.config['EMAIL_VALIDATOR_EXEMPT']:
+                pass
+            else:
+                raise ValidationError('Email already in use')
 
 
 class RecipientRegistrationForm(RegistrationForm):

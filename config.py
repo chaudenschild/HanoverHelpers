@@ -29,9 +29,10 @@ class Config():
     VOLUNTEER_EMAIL_SEND_TIME = {
         'day_of_week': 'fri', 'hour': 6, 'minute': 0}
     STORE_LIST = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
-                  'CVS', "BJ's", 'NH Liquor Outlet']
+                  'CVS', "BJ's", 'NH Liquor Outlet', 'Price Chopper']
     PAYMENT_TYPE = ['Check', 'Paypal',
                     'Coop Charge Account (Specify Account # in Payment Notes)', 'Other (Specify in Payment Notes)']
+    EMAIL_VALIDATOR_EXEMPT = ['cch360@gmail.com', 'dcurran@kah.kendal.org']
 
 
 # Set environment vars for local testing
