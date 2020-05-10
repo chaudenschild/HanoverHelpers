@@ -430,12 +430,19 @@ def upload_file(transaction_id):
             flash('No selected file')
             return redirect(request.url)
         if not allowed_file(file.filename):
-            flash(f'Filetype must be of {allowed_files}')
+            flash(f'Filetype must be of {allowed_exts}')
             return redirect(request.url)
         if file:
 
             transaction = Transaction.query.filter_by(
                 id=transaction_id).first()
+
+            # make the dir
+            if not os.path.exists(os.path.join(
+                    app.static_folder, app.config['IMAGE_UPLOAD_FOLDER'])):
+                os.mkdir(os.path.join(
+                    app.static_folder, app.config['IMAGE_UPLOAD_FOLDER']))
+
             # check for presence of previous receipt and delete
             if transaction.image_fname is not None:
                 os.remove(os.path.join(
@@ -480,5 +487,4 @@ def delete_file(transaction_id):
 @app.route('/uploads/<filename>')
 @login_required
 def uploaded_file(filename):
-    # hacky hardcode
     return send_from_directory(os.path.join(app.static_folder, app.config['IMAGE_UPLOAD_FOLDER']), filename)
