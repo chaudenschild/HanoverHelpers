@@ -99,7 +99,11 @@ crossorigin="anonymous"></script>
 <script>
 $(document).ready( function () {
   $('table.display').DataTable({
-  "ordering": false});
+  "ordering": false,
+  "oLanguage": {
+        "sEmptyTable": "There are no deliveries to be claimed right now - check back later!"
+    }
+});
 } );
 </script>
 
