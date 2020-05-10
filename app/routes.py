@@ -21,6 +21,14 @@ from app.models import (BaseUser, Recipient, Transaction, UserDirectory,
                         transaction_signup_view)
 
 
+@app.before_request
+def before_request():
+    if app.env != 'development':
+        if not request.is_secure or request.url.startswith('http://'):
+            url = request.url.replace('http://', 'https://', 1)
+            return redirect(url, code=301)  # permanent redirect
+
+
 @app.route('/')
 def root():
     return redirect(url_for('login'))
@@ -312,7 +320,7 @@ def edit_transaction(transaction_id):
         db.session.add(transaction)
         db.session.commit()
 
-        flash(f'Delivery modified!')
+        flash('Delivery modified!')
         send_confirmation(
             current_user, 'recipient_modification', transaction)
 
@@ -347,7 +355,7 @@ def drop_transaction(transaction_id):
     db.session.commit()
     flash('Delivery dropped')
 
-    return redirect(url_for('deliveries', current_user))
+    return redirect(url_for('deliveries', username=current_user.username))
 
 
 @app.route('/cancel/<transaction_id>', methods=['GET', 'POST'])
@@ -369,6 +377,17 @@ def cancel_transaction(transaction_id):
         db.session.delete(transaction)
         db.session.commit()
         flash('Delivery canceled')
+
+    return redirect(url_for('deliveries', username=current_user.username))
+
+
+@app.route('/send_volunteer_email/<transaction_id>', methods=['GET', 'POST'])
+@login_required
+def send_volunteer_email(transaction_id):
+    transaction = Transaction.query.filter_by(id=transaction_id).first()
+    send_confirmation(transaction.volunteer,
+                      'volunteer_reminder', transaction)
+    flash(f'Grocery list emailed to {transaction.volunteer.email}')
 
     return redirect(url_for('deliveries', username=current_user.username))
 

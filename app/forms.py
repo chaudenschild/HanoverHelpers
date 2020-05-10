@@ -4,13 +4,14 @@ import pandas as pd
 import phonenumbers
 from flask_login import current_user
 from flask_wtf import FlaskForm
+from sqlalchemy import or_
 from wtforms import (BooleanField, FloatField, PasswordField, RadioField,
                      SelectField, StringField, SubmitField, TextAreaField)
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
 from app import app, db
-from app.models import Recipient, Transaction, UserDirectory
+from app.models import Recipient, Transaction, UserDirectory, Volunteer
 
 
 class LoginForm(FlaskForm):
@@ -58,6 +59,25 @@ class RegistrationForm(FlaskForm):
 
         if user is not None:  # check uniqueness in both user types
             raise ValidationError('Username already in use.')
+
+    def validate_email(self, email):
+
+        user_r = Recipient.query.filter(
+            Recipient.email.ilike(email.data)).first()
+        user_v = Volunteer.query.filter(
+            Volunteer.email.ilike(email.data)).first()
+
+        if user_r is not None:
+            if user_r.email in app.config['EMAIL_VALIDATOR_EXEMPT']:
+                pass
+            else:
+                raise ValidationError('Email already in use')
+
+        if user_v is not None:
+            if user_v.email in app.config['EMAIL_VALIDATOR_EXEMPT']:
+                pass
+            else:
+                raise ValidationError('Email already in use')
 
 
 class RecipientRegistrationForm(RegistrationForm):
@@ -122,7 +142,8 @@ class TransactionForm(FlaskForm):
     payment_type = SelectField('Payment Type', validators=[DataRequired()], choices=[
                                (x, x) for x in app.config['PAYMENT_TYPE']])
     payment_notes = TextAreaField('Payment Notes')
-    grocery_list = TextAreaField('Grocery List', validators=[DataRequired()])
+    grocery_list = TextAreaField('Grocery List', render_kw={
+                                 "rows": 10, "cols": 11}, validators=[DataRequired()])
     other_notes = TextAreaField('Other Notes')
     submit = SubmitField('Book Delivery')
 
@@ -132,6 +153,15 @@ class TransactionForm(FlaskForm):
 
     def validate_date(self, date):
 
+        if pd.to_datetime(date.data).weekday() not in [4, 5]:
+            raise ValidationError(
+                'Orders/modifications must be placed for Friday or Saturday')
+
+        if pd.to_datetime(date.data) < dt.datetime.now():
+            raise ValidationError(
+                "Volunteers cannot travel back in time."
+            )
+
         # Find next Thursday
         d = dt.datetime.today()
         while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
@@ -140,19 +170,13 @@ class TransactionForm(FlaskForm):
         cutoff = dt.datetime(d.year, d.month, d.day,
                              app.config['CUTOFF_DAYTIME']['Hour'])
 
-        if dt.datetime.now() > cutoff:
+        if cutoff < dt.datetime.now():
             raise ValidationError(
                 'Please note that the deadline for making changes to your order has passed. If you wish to cancel your order, please call Natalie at 401-575-3142.')
 
-        if pd.to_datetime(date.data).weekday() not in [4, 5]:
-            raise ValidationError(
-                'Orders/modifications must be placed on Friday or Saturday')
-
-        if self.username is not None:
-
-            early_window = pd.to_datetime(
-                date.data) - pd.Timedelta(days=2)
-            late_window = pd.to_datetime(date.data) + pd.Timedelta(days=2)
+        if self.username is not None:  # only on new booking
+            early_window = date.data - dt.timedelta(2)
+            late_window = date.data + dt.timedelta(2)
             counts = db.session.query(Transaction, Recipient).join(Recipient) \
                 .filter_by(username=self.username)\
                 .filter(Transaction.date >= early_window)\

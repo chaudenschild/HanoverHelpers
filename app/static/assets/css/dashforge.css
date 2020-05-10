@@ -937,6 +937,7 @@ BUGS:
   font-named-instance: 'Italic';
   src: url("../fonts/inter-ui/Inter-UI-italic.var.woff2") format("woff2 supports variations(gvar)"), url("../fonts/inter-ui/Inter-UI-italic.var.woff2") format("woff2-variations"), url("../fonts/inter-ui/Inter-UI-italic.var.woff2") format("woff2"); }
 
+
 /* ############### BOOTSTRAP FRAMEWORK ############### */
 /*!
  * Bootstrap v4.3.1 (https://getbootstrap.com/)
@@ -991,7 +992,7 @@ article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
 body {
   margin: 0;
   font-family: "IBM Plex Sans", sans-serif;
-  font-size: 0.875rem;
+  font-size: 1.1rem;
   font-weight: 400;
   line-height: 1.5;
   color: #001737;

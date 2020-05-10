@@ -1,19 +1,24 @@
 import os
 
+
 from flask import url_for
 
+from dotenv import load_dotenv
+
+
 basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, '.env'))
 
 
 class Config():
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'hanover-helpers-admin'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
 
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    BASIC_AUTH_USERNAME = 'milo'
-    BASIC_AUTH_PASSWORD = 'numberonehelper'
+    BASIC_AUTH_USERNAME = os.environ.get('BASIC_AUTH_USERNAME')
+    BASIC_AUTH_PASSWORD = os.environ.get('BASIC_AUTH_PASSWORD')
 
     FLASK_ADMIN_SWATCH = 'yeti'
 
@@ -21,17 +26,21 @@ class Config():
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 25)
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    ADMINS = ['hanoverhelpers@gmail.com']
+    MAIL_PASSWORD = os.environ.get('SENDGRID_API_KEY')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
     CUTOFF_DAYTIME = {'Day': 3, 'Hour': 18}  # Thursday 6PM
     # Default Friday 6am
     VOLUNTEER_EMAIL_SEND_TIME = {
         'day_of_week': 'fri', 'hour': 6, 'minute': 0}
     STORE_LIST = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
-                  'CVS', "BJ's", 'NH Liquor Outlet']
+                  'CVS', "BJ's", 'NH Liquor Outlet', 'Price Chopper']
     PAYMENT_TYPE = ['Check', 'Paypal',
                     'Coop Charge Account (Specify Account # in Payment Notes)', 'Other (Specify in Payment Notes)']
+
     IMAGE_UPLOAD_FOLDER = 'receipt_images'  # must be within static folder
+
+    EMAIL_VALIDATOR_EXEMPT = ['cch360@gmail.com', 'dcurran@kah.kendal.org']
+
 
 
 # Set environment vars for email local testing

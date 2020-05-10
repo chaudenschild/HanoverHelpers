@@ -1,6 +1,6 @@
 Dear {{ transaction.volunteer.name }},
 
-Thank you for volunteering to deliver groceries/essential items to {{ transaction.recipient.name }} today, {{ date }}! Please see below for details related to your delivery.
+Thank you for volunteering to deliver groceries/essential items to {{ transaction.recipient.name }} on {{ date }}! Please see below for details related to your delivery.
 
 Recipient Name:
 
@@ -37,6 +37,10 @@ Store:
 Grocery List:
 
 {{ transaction.list }}
+
+To view this order on the online portal click here:
+
+{{ url_for('view_list', transaction_id=transaction.id, _external=True) }}
 
 Please call Natalie at 401-575-3142 know if you have any questions or run into any issues.
 
