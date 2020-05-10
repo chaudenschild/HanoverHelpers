@@ -8,6 +8,5 @@ app.db
 venv/
 generate_fake_db.py
 .coverage
-receipt_images/
 apikey.txt
 .env
