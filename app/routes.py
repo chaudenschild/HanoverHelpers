@@ -439,11 +439,11 @@ def upload_file(transaction_id):
             # check for presence of previous receipt and delete
             if transaction.image_fname is not None:
                 os.remove(os.path.join(
-                    app.config['IMAGE_UPLOAD_FOLDER'], transaction.image_fname))
+                    app.static_folder, app.config['IMAGE_UPLOAD_FOLDER'], transaction.image_fname))
 
             filename = secure_filename(file.filename)
-            file.save(os.path.join(
-                app.config['IMAGE_UPLOAD_FOLDER'], filename))
+            file.save(os.path.join(app.static_folder,
+                                   app.config['IMAGE_UPLOAD_FOLDER'], filename))
 
             transaction.image_fname = filename
             transaction.image_url = url_for('uploaded_file',
@@ -462,9 +462,9 @@ def delete_file(transaction_id):
     transaction = Transaction.query.filter_by(
         id=transaction_id).first()
 
-    os.remove(os.path.join(
-        app.config['IMAGE_UPLOAD_FOLDER'],
-        transaction.image_fname))
+    os.remove(os.path.join(app.static_folder,
+                           app.config['IMAGE_UPLOAD_FOLDER'],
+                           transaction.image_fname))
 
     transaction.image_fname = None
     transaction.image_url = None
@@ -481,4 +481,4 @@ def delete_file(transaction_id):
 @login_required
 def uploaded_file(filename):
     # hacky hardcode
-    return send_from_directory(os.path.join(app.config['IMAGE_UPLOAD_FOLDER']), filename)
+    return send_from_directory(os.path.join(app.static_folder, app.config['IMAGE_UPLOAD_FOLDER']), filename)
