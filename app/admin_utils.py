@@ -1,9 +1,7 @@
 import flask_login
 from flask import redirect, request, url_for
 from flask_admin.contrib.sqla import ModelView
-
 from jinja2 import Markup
-
 from wtforms import fields
 
 from app.models import Recipient, Volunteer
