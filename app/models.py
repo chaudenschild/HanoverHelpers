@@ -59,7 +59,7 @@ class Table():
             url_for(route, transaction_id=int(x)), label, confirm=confirm)
 
     def return_as_completed(self):
-        # no hyperlinks, no id column
+        self.add_transaction_link_column('mark_complete', 'Edit Invoice')
         self.df = self.df.drop(columns=['id', 'username'])
         self.add_column_alias('invoice', 'Invoice')
         self.df = self.df.rename(columns=self.column_aliases)
@@ -299,6 +299,8 @@ class Transaction(db.Model):
     invoice = db.Column(db.Float)
     paid = db.Column(db.Boolean, default=False)
     tip = db.Column(db.Float)
+    image_fname = db.Column(db.String)
+    image_url = db.Column(db.String)
 
     recipient = db.relationship('Recipient', back_populates='transactions')
 

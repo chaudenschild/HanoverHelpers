@@ -1,6 +1,9 @@
 import flask_login
 from flask import redirect, request, url_for
 from flask_admin.contrib.sqla import ModelView
+
+from jinja2 import Markup
+
 from wtforms import fields
 
 from app.models import Recipient, Volunteer
@@ -32,11 +35,12 @@ class RecipientView(ModelView):
 
 class TransactionView(ModelView):
     form_overrides = {'list': fields.TextAreaField}
-    column_exclude_list = ['list', 'notes']
+    column_exclude_list = ['list', 'notes', 'image_fname']
     column_searchable_list = [Recipient.name, Volunteer.name]
     column_filters = ['store', 'claimed', 'completed', 'paid', 'date']
     column_formatters = dict(volunteer=lambda v, c, m, p: m.volunteer.name if m.volunteer is not None else None,
-                             recipient=lambda v, c, m, p: m.recipient.name if m.recipient is not None else None)
+                             recipient=lambda v, c, m, p: m.recipient.name if m.recipient is not None else None,
+                             image_url=lambda v, c, m, p: Markup('<a href="' + m.image_url + '" >Receipt</a>' if m.image_url is not None else ""))
     can_edit = True
     can_view_details = True
     can_export = True
