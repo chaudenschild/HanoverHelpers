@@ -102,7 +102,8 @@ def transaction_signup_view(completed=None, claimed=None):
         *query_list).join(Recipient).filter(filter_statement)
 
     table = Table(query)
-    table.add_transaction_link_column('signup_transaction', 'Pickup')
+    table.add_transaction_link_column(
+        'signup_transaction', 'Pickup', confirm=True)
     table.add_transaction_link_column('view_list', 'View List/Notes')
 
     return table.make_html(drop_cols=None)
