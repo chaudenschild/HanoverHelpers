@@ -1,5 +1,4 @@
 import datetime as dt
-import time
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -13,7 +12,6 @@ sched = BlockingScheduler()
 # Cron job that sends volunteers their delivery details at specified time (Friday morning 6am)
 @sched.scheduled_job('cron', **app.config['VOLUNTEER_EMAIL_SEND_TIME'])
 def send_recipient_email():
-    print('email triggered')
     # Transactions this week must have dates earlier than next Thursday 6PM.
     d = dt.datetime.today()
     while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
@@ -29,13 +27,12 @@ def send_recipient_email():
         for transaction in transactions:
             print(f'{transaction.volunteer.name}, {transaction.recipient.name}')
             print(f'count = {count}')
-            time.sleep(2)
             try:
                 send_confirmation(transaction.volunteer,
                                   'volunteer_reminder', transaction)
                 count += 1
-            except Exception:
-                print('exception raised')
+            except Exception as e:
+                print(e)
                 continue
 
 
