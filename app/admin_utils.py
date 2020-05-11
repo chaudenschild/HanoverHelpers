@@ -32,13 +32,18 @@ class RecipientView(ModelView):
 
 
 class TransactionView(ModelView):
-    form_overrides = {'list': fields.TextAreaField}
-    column_exclude_list = ['list', 'notes', 'image_fname']
+    column_list = ('recipient', 'volunteer', 'store', 'booking_date', 'date', 'payment_type',
+                   'payment_notes', 'claimed', 'completed', 'invoice', 'paid', 'tip', 'image_url', 'edit_image')
+    form_overrides = {'list': fields.TextAreaField,
+                      'edit_image': fields.StringField}
+
     column_searchable_list = [Recipient.name, Volunteer.name]
     column_filters = ['store', 'claimed', 'completed', 'paid', 'date']
     column_formatters = dict(volunteer=lambda v, c, m, p: m.volunteer.name if m.volunteer is not None else None,
                              recipient=lambda v, c, m, p: m.recipient.name if m.recipient is not None else None,
-                             image_url=lambda v, c, m, p: Markup('<a href="' + m.image_url + '" >Receipt</a>' if m.image_url is not None else ""))
+                             image_url=lambda v, c, m, p: Markup(
+                                 '<a href="' + m.image_url + '" >Receipt</a>' if m.image_url is not None else ""),
+                             edit_image=lambda v, c, m, p: Markup('<a href="' + url_for('uploaded_file', filename=m.image_url) + '" >Edit</a>' if m.image_url is not None else ""))
     can_edit = True
     can_view_details = True
     can_export = True
