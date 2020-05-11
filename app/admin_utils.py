@@ -39,11 +39,12 @@ class TransactionView(ModelView):
 
     column_searchable_list = [Recipient.name, Volunteer.name]
     column_filters = ['store', 'claimed', 'completed', 'paid', 'date']
+
     column_formatters = dict(volunteer=lambda v, c, m, p: m.volunteer.name if m.volunteer is not None else None,
                              recipient=lambda v, c, m, p: m.recipient.name if m.recipient is not None else None,
                              image_url=lambda v, c, m, p: Markup(
                                  '<a href="' + m.image_url + '" >Receipt</a>' if m.image_url is not None else ""),
-                             edit_image=lambda v, c, m, p: Markup('<a href="' + url_for('uploaded_file', filename=m.image_fname) + '" >Edit</a>' if m.image_url is not None else ""))
+                             edit_image=lambda v, c, m, p: Markup('<a href="' + url_for('upload_file', transaction_id=m.id) + '" >Edit</a>' if m.image_url is not None else ""))
     can_edit = True
     can_view_details = True
     can_export = True
