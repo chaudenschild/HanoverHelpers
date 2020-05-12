@@ -61,7 +61,7 @@ class TransactionTest(unittest.TestCase):
 
 
 class DateValidationTest(unittest.TestCase):
-
+    # TODO:
     def on_time_trans(self):
         d = dt.datetime().now()
         cutoff = dt.datetime(

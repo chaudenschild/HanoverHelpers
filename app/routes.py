@@ -457,6 +457,7 @@ def upload_file(transaction_id):
                                             filename=filename)
             db.session.add(transaction)
             db.session.commit()
+
             flash('Image added!')
             return redirect(url_for('mark_complete',
                                     transaction_id=transaction_id))

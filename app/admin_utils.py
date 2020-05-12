@@ -44,7 +44,7 @@ class TransactionView(ModelView):
                              recipient=lambda v, c, m, p: m.recipient.name if m.recipient is not None else None,
                              image_url=lambda v, c, m, p: Markup(
                                  '<a href="' + m.image_url + '" >Receipt</a>' if m.image_url is not None else ""),
-                             edit_image=lambda v, c, m, p: Markup('<a href="' + url_for('upload_file', transaction_id=m.id) + '" >Edit/>Add</a>'))
+                             edit_image=lambda v, c, m, p: Markup('<a href="' + url_for('upload_file', transaction_id=m.id) + '" >Edit/Add</a>'))
     can_edit = True
     can_view_details = True
     can_export = True
