@@ -293,12 +293,13 @@ class Transaction(db.Model):
     list = db.Column(db.String)
     payment_type = db.Column(db.String)
     payment_notes = db.Column(db.String)
-    notes = db.Column(db.String)
+    notes = db.Column(db.String)  # aka Other Notes
     claimed = db.Column(db.Boolean, default=False)
     completed = db.Column(db.Boolean, default=False)
     invoice = db.Column(db.Float)
     paid = db.Column(db.Boolean, default=False)
     tip = db.Column(db.Float)
+    admin_notes = db.Column(db.String)
     image_fname = db.Column(db.String)
     image_url = db.Column(db.String)
 
