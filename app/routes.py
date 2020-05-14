@@ -2,8 +2,9 @@ import calendar
 import datetime as dt
 import os
 
+import boto3
 import pandas as pd
-from flask import (flash, redirect, render_template, request,
+from flask import (flash, redirect, render_template, request, send_file,
                    send_from_directory, session, url_for)
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import desc
@@ -19,6 +20,7 @@ from app.forms import (EditLoginForm, InvoiceForm, LoginForm,
 from app.models import (BaseUser, Recipient, Transaction, UserDirectory,
                         Volunteer, get_user_by_userdir_id,
                         transaction_signup_view)
+from app.s3 import upload_file
 
 
 @app.before_request
@@ -421,7 +423,7 @@ def upload_file(transaction_id):
         return '.' in filename and \
             filename.rsplit('.', 1)[1].lower() in allowed_exts
 
-    if request.method == 'POST':
+    if request.method == "POST":
         if 'file' not in request.files:
             flash('No file attached')
             return redirect(request.url)
@@ -433,34 +435,26 @@ def upload_file(transaction_id):
             flash(f'Filetype must be of {allowed_exts}')
             return redirect(request.url)
         if file:
-
             transaction = Transaction.query.filter_by(
                 id=transaction_id).first()
 
-            # make the dir
-            if not os.path.exists(os.path.join(
-                    app.static_folder, app.config['IMAGE_UPLOAD_FOLDER'])):
-                os.mkdir(os.path.join(
-                    app.static_folder, app.config['IMAGE_UPLOAD_FOLDER']))
-
-            # check for presence of previous receipt and delete
-            if transaction.image_fname is not None:
-                os.remove(os.path.join(
-                    app.static_folder, app.config['IMAGE_UPLOAD_FOLDER'], transaction.image_fname))
-
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.static_folder,
-                                   app.config['IMAGE_UPLOAD_FOLDER'], filename))
+            bucket = boto3.resource('s3').Bucket(
+                os.environ.get('S3_BUCKET_NAME'))
 
-            transaction.image_fname = filename
-            transaction.image_url = url_for('uploaded_file',
-                                            filename=filename)
-            db.session.add(transaction)
-            db.session.commit()
+            bucket.Object(os.path.join(
+                app.config['IMAGE_UPLOAD_FOLDER'], filename)).put(Body=file)
 
-            flash('Image added!')
-            return redirect(url_for('mark_complete',
-                                    transaction_id=transaction_id))
+        transaction.image_fname = filename
+        transaction.image_url = url_for('uploaded_file',
+                                        filename=filename)
+        db.session.add(transaction)
+        db.session.commit()
+
+        flash('Image added!')
+        return redirect(url_for('mark_complete',
+                                transaction_id=transaction_id))
+
     return render_template('upload_file_form.html')
 
 
