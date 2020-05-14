@@ -137,6 +137,19 @@ class BaseUser(UserMixin):
         else:
             self.directory_listing.user_type = type
 
+    @property
+    def username(self):
+        return self._username
+
+    @username.setter
+    def username(self, username):
+        self._username = username
+        dir_listing = db.session.query(
+            UserDirectory).filter_by(id=self.userdir_id).first()
+        dir_listing.username = username
+        db.session.add(dir_listing)
+        db.session.commit()
+
     def user_table(self):
         if self.user_type == 'volunteer':
             return Volunteer
@@ -235,7 +248,7 @@ class Recipient(BaseUser, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userdir_id = db.Column(db.Integer, db.ForeignKey(
         'userdirectory.id'), unique=True)
-    username = db.Column(db.String(64), unique=True)
+    _username = db.Column(db.String(64), unique=True)
     name = db.Column(db.String)
     email = db.Column(db.String)
     phone = db.Column(db.String)
@@ -248,8 +261,8 @@ class Recipient(BaseUser, db.Model):
                                         uselist=False, cascade='delete')
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
         self.user_type = 'recipient'
+        super().__init__(**kwargs)
 
     def __repr__(self):
         return f"<Recipient(name='{self.name}', username='{self.username}')>"
@@ -260,7 +273,7 @@ class Volunteer(BaseUser, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userdir_id = db.Column(db.Integer, db.ForeignKey(
         'userdirectory.id'), unique=True)
-    username = db.Column(db.String(64), unique=True)
+    _username = db.Column(db.String(64), unique=True)
     name = db.Column(db.String)
     phone = db.Column(db.String)
     email = db.Column(db.String)
@@ -272,8 +285,8 @@ class Volunteer(BaseUser, db.Model):
                                         uselist=False, cascade='delete')
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
         self.user_type = 'volunteer'
+        super().__init__(**kwargs)
 
     def is_admin(self):
         return self.admin
