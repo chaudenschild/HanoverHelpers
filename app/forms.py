@@ -170,9 +170,9 @@ class TransactionForm(FlaskForm):
         cutoff = dt.datetime(d.year, d.month, d.day,
                              app.config['CUTOFF_DAYTIME']['Hour'])
 
-        if cutoff < dt.datetime.now():
-            raise ValidationError(
-                'Please note that the deadline for making changes to your order has passed. If you wish to cancel your order, please call Natalie at 401-575-3142.')
+        # if cutoff < dt.datetime.now():
+        #    raise ValidationError(
+        #        'Please note that the deadline for making changes to your order has passed. If you wish to cancel your order, please call Natalie at 401-575-3142.')
 
         if self.username is not None:  # only on new booking
             early_window = date.data - dt.timedelta(2)
