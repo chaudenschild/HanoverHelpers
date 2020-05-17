@@ -283,7 +283,7 @@ def delivery_signup():
     return render_template('delivery_signup.html', transaction_html=transaction_html)
 
 
-@app.route('/signup_transaction/<transaction_id>', methods=['GET', 'POST'])
+@app.route('/signup_transaction/<transaction_id>', methods=['POST'])
 @login_required
 def signup_transaction(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
@@ -338,7 +338,7 @@ def edit_transaction(transaction_id):
     return render_template('standard_form.html', header='Edit Delivery', form=form)
 
 
-@app.route('/view/<transaction_id>', methods=['GET', 'POST'])
+@app.route('/view/<transaction_id>', methods=['POST'])
 @login_required
 def view_list(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
@@ -346,7 +346,7 @@ def view_list(transaction_id):
     return render_template('view.html', transaction=transaction)
 
 
-@app.route('/drop/<transaction_id>', methods=['GET', 'POST'])
+@app.route('/drop/<transaction_id>', methods=['POST'])
 @login_required
 def drop_transaction(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
@@ -358,7 +358,7 @@ def drop_transaction(transaction_id):
     return redirect(url_for('deliveries', username=current_user.username))
 
 
-@app.route('/cancel/<transaction_id>', methods=['GET', 'POST'])
+@app.route('/cancel/<transaction_id>', methods=['POST'])
 @login_required
 def cancel_transaction(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
@@ -381,7 +381,7 @@ def cancel_transaction(transaction_id):
     return redirect(url_for('deliveries', username=current_user.username))
 
 
-@app.route('/send_volunteer_email/<transaction_id>', methods=['GET', 'POST'])
+@app.route('/send_volunteer_email/<transaction_id>', methods=['POST'])
 @login_required
 def send_volunteer_email(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
@@ -412,7 +412,7 @@ def mark_complete(transaction_id):
     return render_template('invoice_form.html', header='Invoice', form=form, transaction=transaction)
 
 
-@app.route('/upload_file/<transaction_id>', methods=['GET', 'POST'])
+@app.route('/upload_file/<transaction_id>', methods=['POST'])
 @login_required
 def upload_file(transaction_id):
     allowed_exts = ['png', 'jpg', 'jpeg']
@@ -464,7 +464,7 @@ def upload_file(transaction_id):
     return render_template('upload_file_form.html')
 
 
-@app.route('/delete_file/<transaction_id>', methods=['GET', 'POST'])
+@app.route('/delete_file/<transaction_id>', methods=['POST'])
 @login_required
 def delete_file(transaction_id):
     transaction = Transaction.query.filter_by(

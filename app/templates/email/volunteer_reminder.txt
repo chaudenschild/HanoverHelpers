@@ -42,7 +42,6 @@ To view this order on the online portal click here:
 
 {{ url_for('view_list', transaction_id=transaction.id, _external=True) }}
 
-Please call Natalie at 401-575-3142 know if you have any questions or run into any issues.
 
 Please let us know if you have any questions or run into any issues.
 Thank you,

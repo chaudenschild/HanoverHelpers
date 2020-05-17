@@ -22,7 +22,7 @@ admin = Admin(app, name='Hanover Helpers Admin', template_mode='bootstrap3')
 bootstrap = Bootstrap(app)
 mail = Mail(app)
 
-from app import models, routes, admin_utils
+from app import models, routes, admin_utils, errors
 
 admin.add_view(admin_utils.VolunteerView(models.Volunteer, db.session))
 admin.add_view(admin_utils.RecipientView(models.Recipient, db.session))
