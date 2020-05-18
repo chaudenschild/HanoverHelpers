@@ -338,7 +338,7 @@ def edit_transaction(transaction_id):
     return render_template('standard_form.html', header='Edit Delivery', form=form)
 
 
-@app.route('/view/<transaction_id>', methods=['POST'])
+@app.route('/view/<transaction_id>', methods=['GET', 'POST'])
 @login_required
 def view_list(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
