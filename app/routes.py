@@ -283,7 +283,7 @@ def delivery_signup():
     return render_template('delivery_signup.html', transaction_html=transaction_html)
 
 
-@app.route('/signup_transaction/<transaction_id>', methods=['POST'])
+@app.route('/signup_transaction/<transaction_id>', methods=['GET', 'POST'])
 @login_required
 def signup_transaction(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
@@ -381,7 +381,7 @@ def cancel_transaction(transaction_id):
     return redirect(url_for('deliveries', username=current_user.username))
 
 
-@app.route('/send_volunteer_email/<transaction_id>', methods=['POST'])
+@app.route('/send_volunteer_email/<transaction_id>', methods=['GET', 'POST'])
 @login_required
 def send_volunteer_email(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
