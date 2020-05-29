@@ -127,9 +127,11 @@ def reset_password_email():
     form = ResetPasswordEmailForm()
 
     if form.validate_on_submit():
-        user = Recipient.query.filter_by(email=form.email.data).first()
+        user = Recipient.query.filter(
+            Recipient.email.ilike(form.email.data)).first()
         if user is None:
-            user = Volunteer.query.filter_by(email=form.email.data).first()
+            user = Volunteer.query.filter(
+                Volunteer.email.ilike(form.email.data)).first()
         if user is None:
             flash('Email not in database')
         else:
