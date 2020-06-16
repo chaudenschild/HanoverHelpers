@@ -137,7 +137,7 @@ class TransactionForm(FlaskForm):
 
     store = SelectField('Store', choices=[
         (x, x) for x in app.config['STORE_LIST']], validators=[DataRequired()])
-    date = DateField('Date (Either Friday or Saturday)',
+    date = DateField('Date (Either Friday, Saturday, or Sunday)',
                      validators=[DataRequired()])
     payment_type = SelectField('Payment Type', validators=[DataRequired()], choices=[
                                (x, x) for x in app.config['PAYMENT_TYPE']])
@@ -153,9 +153,9 @@ class TransactionForm(FlaskForm):
 
     def validate_date(self, date):
 
-        if pd.to_datetime(date.data).weekday() not in [4, 5]:
+        if pd.to_datetime(date.data).weekday() not in [4, 5, 6]:
             raise ValidationError(
-                'Orders/modifications must be placed for Friday or Saturday')
+                'Orders/modifications must be placed for Friday, Saturday, or Sunday')
 
         if pd.to_datetime(date.data) < dt.datetime.now():
             raise ValidationError(
@@ -172,7 +172,7 @@ class TransactionForm(FlaskForm):
 
         # if cutoff < dt.datetime.now():
         #    raise ValidationError(
-        #        'Please note that the deadline for making changes to your order has passed. If you wish to cancel your order, please call Natalie at 401-575-3142.')
+        #        'Please note that the deadline for making changes to your order has passed.')
 
         if self.username is not None:  # only on new booking
             early_window = date.data - dt.timedelta(2)
