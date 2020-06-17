@@ -1,10 +1,7 @@
 import os
 
-
-from flask import url_for
-
 from dotenv import load_dotenv
-
+from flask import url_for
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
@@ -34,13 +31,12 @@ class Config():
         'day_of_week': 'fri', 'hour': 6, 'minute': 0}
     STORE_LIST = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
                   'CVS', "BJ's", 'NH Liquor Outlet', 'Price Chopper']
-    PAYMENT_TYPE = ['Check', 'Paypal',
-                    'Coop Charge Account (Specify Account # in Payment Notes)', 'Other (Specify in Payment Notes)']
+    PAYMENT_TYPE = ['Kendal Invoice',
+                    'Coop Charge Account (Specify Account # in Payment Notes)']
 
     IMAGE_UPLOAD_FOLDER = 'receipt_images'  # must be within static folder
 
     EMAIL_VALIDATOR_EXEMPT = ['cch360@gmail.com', 'dcurran@kah.kendal.org']
-
 
 
 # Set environment vars for email local testing
