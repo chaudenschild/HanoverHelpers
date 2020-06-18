@@ -32,7 +32,7 @@ class Config():
     STORE_LIST = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
                   'CVS', "BJ's", 'NH Liquor Outlet', 'Price Chopper']
     PAYMENT_TYPE = ['Kendal Invoice',
-                    'Coop Charge Account (Specify Account # in Payment Notes)']
+                    'Coop Charge Account (Specify Account # in Payment Notes)', 'Other']
 
     IMAGE_UPLOAD_FOLDER = 'receipt_images'  # must be within static folder
 

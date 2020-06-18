@@ -366,19 +366,19 @@ def cancel_transaction(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
 
     # nearest Thursday
-    d = dt.datetime.today()
-    while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
-        d += dt.timedelta(1)
+    #d = dt.datetime.today()
+    # while d.weekday() != app.config['CUTOFF_DAYTIME']['Day']:
+    #d += dt.timedelta(1)
     # 6PM
-    cutoff = dt.datetime(d.year, d.month, d.day,
-                         app.config['CUTOFF_DAYTIME']['Hour'])
+    # cutoff = dt.datetime(d.year, d.month, d.day,
+    #                     app.config['CUTOFF_DAYTIME']['Hour'])
 
-    if dt.datetime.now() > cutoff:
-        flash('Please note that the deadline for canceling your order has passed. If you wish to cancel your order, please call Natalie at 401-575-3142.')
-    else:
-        db.session.delete(transaction)
-        db.session.commit()
-        flash('Delivery canceled')
+    # if dt.datetime.now() > cutoff:
+    #    flash('Please note that the deadline for canceling your order has passed. If you wish to cancel your order, please call Natalie at 401-575-3142.')
+    # else:
+    db.session.delete(transaction)
+    db.session.commit()
+    flash('Delivery canceled')
 
     return redirect(url_for('deliveries', username=current_user.username))
 
