@@ -157,7 +157,7 @@ class BaseUser(UserMixin):
             return True
         return check_password_hash(self.password_hash, password)
 
-    def get_reset_password_token(self, expires_in=600):
+    def get_reset_password_token(self, expires_in=1800):
         return jwt.encode(
             {'reset_password': self.id,
              'user_type': self.user_type,
