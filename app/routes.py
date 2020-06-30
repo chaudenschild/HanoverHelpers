@@ -149,7 +149,8 @@ def reset_password(token):
 
     user = BaseUser.verify_reset_password_token(token)
     if not user:
-        return redirect(url_for('index'))
+        flash('There was an error with the password reset token.')
+        return redirect(url_for('login'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
         user.set_password(form.password.data)

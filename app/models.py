@@ -117,7 +117,7 @@ class UserDirectory(db.Model):
     user_type = db.Column(db.String())
 
     def __repr__(self):
-        return f"<User(username='{self.username}', user_name='{self.user_type}')>"
+        return f"<User(username='{self.username}', user_type='{self.user_type}')>"
 
 
 class BaseUser(UserMixin):
