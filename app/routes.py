@@ -243,6 +243,7 @@ def book():
 
         trans = Transaction(store=form.store.data,
                             date=pd.to_datetime(form.date.data),
+                            flexible=form.flexible.data,
                             payment_type=form.payment_type.data, payment_notes=form.payment_notes.data,
                             list=form.grocery_list.data,
                             notes=form.other_notes.data,
@@ -315,6 +316,7 @@ def edit_transaction(transaction_id):
 
         transaction.store = form.store.data
         transaction.date = form.date.data
+        transaction.flexible = form.flexible.data
         transaction.payment_type = form.payment_type.data
         transaction.payment_notes = form.payment_notes.data
         transaction.list = form.grocery_list.data
@@ -334,6 +336,7 @@ def edit_transaction(transaction_id):
 
         form.store.data = transaction.store
         form.date.data = transaction.date
+        form.flexible.data = transaction.flexible
         form.payment_type.data = transaction.payment_type
         form.payment_notes.data = transaction.payment_notes
         form.grocery_list.data = transaction.list

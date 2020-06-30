@@ -32,7 +32,7 @@ class RecipientView(ModelView):
 
 
 class TransactionView(ModelView):
-    column_list = ('recipient', 'volunteer', 'store', 'booking_date', 'date', 'payment_type',
+    column_list = ('recipient', 'volunteer', 'store', 'booking_date', 'date', 'flexible', 'payment_type',
                    'payment_notes', 'claimed', 'completed', 'invoice', 'paid', 'tip', 'admin_notes')
     form_overrides = {'list': fields.TextAreaField,
                       'admin_notes': fields.TextAreaField,

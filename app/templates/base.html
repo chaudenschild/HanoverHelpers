@@ -78,6 +78,14 @@ Hanover Helpers
 
 <!-- DashForge CSS -->
 <link href="{{ url_for('static', filename='/assets/css/dashforge.css') }}" rel="stylesheet">
+
+<style>
+th {
+  text-align: left;
+}
+</style>
+
+
 {% endblock %}
 
 
@@ -99,10 +107,13 @@ crossorigin="anonymous"></script>
 <script>
 $(document).ready( function () {
   $('table.display').DataTable({
-  "ordering": false,
+  "ordering": true,
   "oLanguage": {
-        "sEmptyTable": "Empty"
-    }
+        "sEmptyTable": "No records"
+    },
+  "columnDefs": [
+    { "orderable": false, "targets": [-1, -2, -3] }
+  ]
   });
 
   $('.confirmation').on('click', function () {

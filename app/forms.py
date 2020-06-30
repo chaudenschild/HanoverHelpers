@@ -137,6 +137,7 @@ class TransactionForm(FlaskForm):
 
     store = SelectField('Store', choices=[
         (x, x) for x in app.config['STORE_LIST']], validators=[DataRequired()])
+    flexible = BooleanField('Delivery Date Flexible', default='checked')
     date = DateField('Date (Either Friday, Saturday, or Sunday)',
                      validators=[DataRequired()])
     payment_type = SelectField('Payment Type', validators=[DataRequired()], choices=[

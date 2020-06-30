@@ -46,7 +46,8 @@ class Table():
         self.df = pd.read_sql(query.statement, db.session.bind)
         self.formatters = {'Delivery Date': lambda x: '<b>' +
                            str(x) + '</b>',
-                           'Notes': Table._add_autoscroll}
+                           'Notes': Table._add_autoscroll,
+                           'Delivery Date Flexible': lambda x: 'Yes' if x else 'No'}
 
     def add_column_alias(self, k, v):
         self.column_aliases[k] = v
@@ -91,6 +92,7 @@ def transaction_signup_view(completed=None, claimed=None):
                   Recipient.name,
                   Transaction.store,
                   Transaction.date,
+                  Transaction.flexible,
                   Transaction.notes
                   ]
 
@@ -106,6 +108,7 @@ def transaction_signup_view(completed=None, claimed=None):
     table.add_transaction_link_column(
         'signup_transaction', 'Pickup', confirm=True)
     table.add_transaction_link_column('view_list', 'View List/Notes')
+    table.add_column_alias('flexible', 'Delivery Date Flexible')
 
     return table.make_html(drop_cols=None)
 
@@ -192,6 +195,7 @@ class BaseUser(UserMixin):
                       Transaction.id,
                       Transaction.booking_date,
                       Transaction.date,
+                      Transaction.flexible,
                       Transaction.store,
                       Counterpart.name,
                       Counterpart.phone]
@@ -219,6 +223,7 @@ class BaseUser(UserMixin):
                 'cancel_transaction', 'Cancel', confirm=True)
             table.add_column_alias('name', 'Volunteer Name')
             table.add_column_alias('phone', 'Volunteer Phone')
+            table.add_column_alias('flexible', 'Delivery Date Flexible')
 
         elif self.user_type == 'volunteer':
             table.add_transaction_link_column(
@@ -229,6 +234,7 @@ class BaseUser(UserMixin):
                 'drop_transaction', 'Drop', confirm=True)
             table.add_column_alias('name', 'Recipient Name')
             table.add_column_alias('phone', 'Recipient Phone')
+            table.add_column_alias('flexible', 'Delivery Date Flexible')
 
         return table.make_html()
 
@@ -293,6 +299,7 @@ class Transaction(db.Model):
     store = db.Column(db.String)
     booking_date = db.Column(db.Date, index=True)
     date = db.Column(db.Date, index=True)
+    flexible = db.Column(db.Boolean, default=True)
     list = db.Column(db.String)
     payment_type = db.Column(db.String)
     payment_notes = db.Column(db.String)
