@@ -303,8 +303,6 @@ class Transaction(db.Model):
     paid = db.Column(db.Boolean, default=False)
     tip = db.Column(db.Float)
     admin_notes = db.Column(db.String)
-    image_fname = db.Column(db.String)
-    image_url = db.Column(db.String)
 
     recipient = db.relationship('Recipient', back_populates='transactions')
 
