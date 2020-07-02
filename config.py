@@ -29,8 +29,8 @@ class Config():
     # Default Friday 6am
     VOLUNTEER_EMAIL_SEND_TIME = {
         'day_of_week': 'fri', 'hour': 6, 'minute': 0}
-    STORE_LIST = ['Hanover Coop', 'Lebanon Coop', "Hannaford's",
-                  'CVS', "BJ's", 'NH Liquor Outlet', 'Price Chopper']
+    STORE_LIST = ['Hanover Coop', 'Hanover Coop Curbside Pickup', 'Lebanon Coop', "Hannaford's",
+                  'CVS', "BJ's", "BJ's Curbside Pickup", 'NH Liquor Outlet', 'Price Chopper']
     PAYMENT_TYPE = ['Kendal Invoice',
                     'Coop Charge Account (Specify Account # in Payment Notes)', 'Other']
 
