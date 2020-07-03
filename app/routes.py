@@ -416,4 +416,4 @@ def mark_complete(transaction_id):
     elif request.method == 'GET':
         form.invoice.data = transaction.invoice
 
-    return render_template('invoice_form.html', header='Invoice', form=form, transaction=transaction)
+    return render_template('standard_form.html', header='Invoice', form=form, transaction=transaction)
