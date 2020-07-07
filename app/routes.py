@@ -250,6 +250,11 @@ def book():
                             booking_date=dt.date.today())
         trans.assign_recipient(current_user)
 
+        if current_user.buddy is not None:
+            trans.claimed = True
+            send_confirmation(
+                current_user, 'volunteer_buddy', transaction=trans)
+
         db.session.add(trans)
         db.session.commit()
 
@@ -357,10 +362,13 @@ def view_list(transaction_id):
 @login_required
 def drop_transaction(transaction_id):
     transaction = Transaction.query.filter_by(id=transaction_id).first()
+    had_volunteer = transaction.volunteer is not None
     transaction.drop_volunteer()
     db.session.add(transaction)
     db.session.commit()
-    flash('Delivery dropped')
+
+    flash('Delivery dropped') if had_volunteer else flash(
+        'Thank you! We will find another volunteer for your buddy.')
 
     return redirect(url_for('deliveries', username=current_user.username))
 

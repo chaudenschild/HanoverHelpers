@@ -251,6 +251,10 @@ class Recipient(BaseUser, db.Model):
     address = db.Column(db.String)
     address_notes = db.Column(db.String)
     password_hash = db.Column(db.String(128))
+    buddy_id = db.Column(db.Integer, db.ForeignKey('volunteer.id'))
+
+    buddy = db.relationship(
+        'Volunteer', back_populates='buddy',)
 
     transactions = db.relationship('Transaction', back_populates='recipient')
     directory_listing = db.relationship('UserDirectory',
@@ -275,6 +279,9 @@ class Volunteer(BaseUser, db.Model):
     email = db.Column(db.String)
     password_hash = db.Column(db.String(128))
     admin = db.Column(db.Boolean, default=False)
+
+    buddy = db.relationship(
+        'Recipient', back_populates='buddy')
 
     transactions = db.relationship('Transaction', back_populates='volunteer')
     directory_listing = db.relationship('UserDirectory',

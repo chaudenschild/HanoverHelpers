@@ -1,0 +1,26 @@
+Hi {{ user.name }}!
+
+Your Hanover Helpers buddy {{ transaction.recipient.name }} just requested a delivery! See below for order details.
+
+Delivery Date: {{ date }} ({% if transaction.flexible %}flexible{% else %} not flexible {% endif %})
+
+Store: {{ transaction.store }}
+
+Shopping List:
+
+{% for elem in transaction.print_list() %}
+  {{ elem }}
+{% endfor %}
+
+Payment Method: {{ transaction.payment_type }}
+
+Click the link below to claim {{ transaction.recipient.name }}'s delivery!
+
+{{ url_for('signup_transaction', transaction_id=transaction.id, _external=True) }}
+
+Click the link below if you are unable to find a delivery day that works for both you and your buddy this week. If that is the case, we will open up the order to the other helpers.
+
+{{ url_for('drop_transaction', transaction_id=transaction.id, _external=True) }}
+
+Thank you for volunteering,
+Hanover Helpers team
