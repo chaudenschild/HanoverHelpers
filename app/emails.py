@@ -50,6 +50,9 @@ def send_confirmation(user, confirmation_type, transaction):
     elif confirmation_type == 'volunteer_reminder':
         template = 'volunteer_reminder'
         subject = f'Delivery reminder for {transaction.recipient.name}, {date_str}'
+    elif confirmation_type == 'volunteer_buddy':
+        template = 'volunteer_buddy_alert'
+        subject = f'Your HH buddy booked a delivery'
     send_email(subject,
                recipients=[user.email],
                text_body=render_template(f'email/{template}.txt',
