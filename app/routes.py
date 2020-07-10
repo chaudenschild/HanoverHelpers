@@ -253,7 +253,7 @@ def book():
         if current_user.buddy is not None:
             trans.claimed = True
             send_confirmation(
-                current_user, 'volunteer_buddy', transaction=trans)
+                current_user.buddy, 'volunteer_buddy', transaction=trans)
 
         db.session.add(trans)
         db.session.commit()
